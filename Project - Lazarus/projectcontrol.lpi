@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <PathDelim Value="\"/>
+    <General>
+      <MainUnit Value="0"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <Language Value=""/>
+      <CharSet Value=""/>
+      <StringTable ProductVersion=""/>
+    </VersionInfo>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="2">
+      <Item1>
+        <PackageName Value="lnetvisual"/>
+        <MinVersion Minor="6" Release="4" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
+    </RequiredPackages>
+    <Units Count="9">
+      <Unit0>
+        <Filename Value="projectcontrol.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="projectcontrol"/>
+        <EditorIndex Value="6"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="24" Y="2"/>
+        <UsageCount Value="209"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="control.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Fcontrol"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="control"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="50" Y="10"/>
+        <UsageCount Value="209"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="microml.pas"/>
+        <UnitName Value="microml"/>
+        <TopLine Value="1"/>
+        <CursorPos X="44" Y="79"/>
+        <UsageCount Value="119"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="configsimtwo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Fconfig"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="configSimTwo"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="37"/>
+        <CursorPos X="9" Y="62"/>
+        <UsageCount Value="239"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="robotmainfunctions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="robotmainfunctions"/>
+        <EditorIndex Value="5"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="815"/>
+        <CursorPos X="135" Y="859"/>
+        <UsageCount Value="238"/>
+        <Loaded Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="astar.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FAStar"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="AStar"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="594"/>
+        <CursorPos X="81" Y="624"/>
+        <UsageCount Value="228"/>
+        <Loaded Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="decconsts.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DecConsts"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="13"/>
+        <CursorPos X="32" Y="6"/>
+        <UsageCount Value="211"/>
+        <Loaded Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="astarmodified.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AStarModified"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="826"/>
+        <CursorPos X="23" Y="826"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="rstar.pas"/>
+        <UnitName Value="RStar"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="473"/>
+        <CursorPos X="11" Y="517"/>
+        <UsageCount Value="131"/>
+        <Loaded Value="True"/>
+      </Unit8>
+    </Units>
+    <JumpHistory Count="9" HistoryIndex="8">
+      <Position1>
+        <Filename Value="astar.pas"/>
+        <Caret Line="616" Column="81" TopLine="605"/>
+      </Position1>
+      <Position2>
+        <Filename Value="astar.pas"/>
+        <Caret Line="11" Column="3" TopLine="1"/>
+      </Position2>
+      <Position3>
+        <Filename Value="astar.pas"/>
+        <Caret Line="22" Column="16" TopLine="18"/>
+      </Position3>
+      <Position4>
+        <Filename Value="astar.pas"/>
+        <Caret Line="612" Column="57" TopLine="603"/>
+      </Position4>
+      <Position5>
+        <Filename Value="astar.pas"/>
+        <Caret Line="621" Column="29" TopLine="614"/>
+      </Position5>
+      <Position6>
+        <Filename Value="rstar.pas"/>
+        <Caret Line="13" Column="75" TopLine="1"/>
+      </Position6>
+      <Position7>
+        <Filename Value="astar.pas"/>
+        <Caret Line="515" Column="60" TopLine="489"/>
+      </Position7>
+      <Position8>
+        <Filename Value="rstar.pas"/>
+        <Caret Line="690" Column="78" TopLine="646"/>
+      </Position8>
+      <Position9>
+        <Filename Value="rstar.pas"/>
+        <Caret Line="603" Column="11" TopLine="570"/>
+      </Position9>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <SyntaxMode Value="FPC"/>
+        <UseAnsiStrings Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

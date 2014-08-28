@@ -1,0 +1,1088 @@
+object Fcontrol: TFcontrol
+  Left = 377
+  Height = 541
+  Top = 118
+  Width = 783
+  Caption = '5DPO Control'
+  ClientHeight = 541
+  ClientWidth = 783
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  SessionProperties = 'CBListen.Checked;CBLoopBack.Checked;EditListenPort.Text;EditMess.Text;MemoLoopBack.Lines;EditIP.Text'
+  LCLVersion = '1.0.12.0'
+  object Label7: TLabel
+    Left = 360
+    Height = 20
+    Top = 107
+    Width = 43
+    Caption = 'V. Ref.'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label8: TLabel
+    Left = 616
+    Height = 20
+    Top = 32
+    Width = 64
+    Caption = 'X Position'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label9: TLabel
+    Left = 704
+    Height = 20
+    Top = 32
+    Width = 63
+    Caption = 'Y Position'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label10: TLabel
+    Left = 584
+    Height = 20
+    Top = 56
+    Width = 9
+    Caption = '1'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label11: TLabel
+    Left = 584
+    Height = 20
+    Top = 80
+    Width = 9
+    Caption = '2'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label12: TLabel
+    Left = 584
+    Height = 20
+    Top = 104
+    Width = 9
+    Caption = '3'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label13: TLabel
+    Left = 584
+    Height = 20
+    Top = 128
+    Width = 9
+    Caption = '4'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label14: TLabel
+    Left = 584
+    Height = 20
+    Top = 152
+    Width = 9
+    Caption = '5'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label15: TLabel
+    Left = 584
+    Height = 20
+    Top = 176
+    Width = 9
+    Caption = '6'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label16: TLabel
+    Left = 584
+    Height = 20
+    Top = 200
+    Width = 9
+    Caption = '7'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label17: TLabel
+    Left = 584
+    Height = 20
+    Top = 224
+    Width = 9
+    Caption = '8'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label18: TLabel
+    Left = 584
+    Height = 20
+    Top = 248
+    Width = 9
+    Caption = '9'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label19: TLabel
+    Left = 584
+    Height = 20
+    Top = 272
+    Width = 17
+    Caption = '10'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label20: TLabel
+    Left = 584
+    Height = 20
+    Top = 296
+    Width = 16
+    Caption = '11'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label21: TLabel
+    Left = 584
+    Height = 20
+    Top = 320
+    Width = 17
+    Caption = '12'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label22: TLabel
+    Left = 360
+    Height = 20
+    Top = 81
+    Width = 9
+    Caption = '3'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label23: TLabel
+    Left = 360
+    Height = 20
+    Top = 56
+    Width = 9
+    Caption = '2'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label24: TLabel
+    Left = 360
+    Height = 20
+    Top = 32
+    Width = 9
+    Caption = '1'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label25: TLabel
+    Left = 384
+    Height = 20
+    Top = 8
+    Width = 55
+    Caption = 'V Motor'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label26: TLabel
+    Left = 464
+    Height = 20
+    Top = 8
+    Width = 12
+    Caption = 'tx'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label27: TLabel
+    Left = 464
+    Height = 20
+    Top = 33
+    Width = 12
+    Caption = 'ty'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label28: TLabel
+    Left = 464
+    Height = 20
+    Top = 59
+    Width = 8
+    Caption = 'v'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label29: TLabel
+    Left = 464
+    Height = 20
+    Top = 80
+    Width = 15
+    Caption = 'vn'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label30: TLabel
+    Left = 464
+    Height = 20
+    Top = 104
+    Width = 12
+    Caption = 'w'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label31: TLabel
+    Left = 432
+    Height = 20
+    Top = 128
+    Width = 43
+    Caption = 'Pontos'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label32: TLabel
+    Left = 645
+    Height = 20
+    Top = 8
+    Width = 43
+    Caption = 'Tempo'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Times New Roman'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentColor = False
+    ParentFont = False
+  end
+  object GroupBox1: TGroupBox
+    Left = 8
+    Height = 140
+    Top = 216
+    Width = 180
+    Caption = 'Manual Control'
+    TabOrder = 4
+  end
+  object Button1: TButton
+    Left = 74
+    Height = 47
+    Top = 240
+    Width = 48
+    Caption = 'Up'
+    Enabled = False
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 74
+    Height = 47
+    Top = 296
+    Width = 48
+    Caption = 'Down'
+    Enabled = False
+    OnClick = Button2Click
+    TabOrder = 1
+  end
+  object Button3: TButton
+    Left = 130
+    Height = 47
+    Top = 272
+    Width = 48
+    Caption = 'Right'
+    Enabled = False
+    OnClick = Button3Click
+    TabOrder = 2
+  end
+  object Button4: TButton
+    Left = 18
+    Height = 47
+    Top = 272
+    Width = 48
+    Caption = 'Left'
+    Enabled = False
+    OnClick = Button4Click
+    TabOrder = 3
+  end
+  object GroupBox2: TGroupBox
+    Left = 8
+    Height = 136
+    Top = 72
+    Width = 180
+    Caption = 'Trajectory Planning Method'
+    TabOrder = 5
+  end
+  object RadioButton2: TRadioButton
+    Left = 32
+    Height = 19
+    Top = 144
+    Width = 33
+    Caption = 'A*'
+    OnChange = RadioButton3Change
+    TabOrder = 6
+  end
+  object RadioButton3: TRadioButton
+    Left = 31
+    Height = 19
+    Top = 120
+    Width = 103
+    Caption = 'Manual Control'
+    OnChange = RadioButton3Change
+    TabOrder = 7
+  end
+  object RadioButton1: TRadioButton
+    Left = 31
+    Height = 19
+    Top = 96
+    Width = 44
+    Caption = 'Stop'
+    OnChange = RadioButton3Change
+    TabOrder = 8
+  end
+  object GroupBox3: TGroupBox
+    Left = 200
+    Height = 140
+    Top = 216
+    Width = 368
+    Caption = '5DPO Velocity and Position'
+    ClientHeight = 122
+    ClientWidth = 364
+    TabOrder = 9
+    object Label1: TLabel
+      Left = 6
+      Height = 20
+      Top = 8
+      Width = 33
+      Caption = 'V1 ='
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -16
+      Font.Name = 'Times New Roman'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label2: TLabel
+      Left = 6
+      Height = 20
+      Top = 48
+      Width = 33
+      Caption = 'V2 ='
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -16
+      Font.Name = 'Times New Roman'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label3: TLabel
+      Left = 6
+      Height = 20
+      Top = 88
+      Width = 33
+      Caption = 'V3 ='
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -16
+      Font.Name = 'Times New Roman'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label4: TLabel
+      Left = 118
+      Height = 20
+      Top = 8
+      Width = 77
+      Caption = 'X Position ='
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -16
+      Font.Name = 'Times New Roman'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label5: TLabel
+      Left = 118
+      Height = 20
+      Top = 48
+      Width = 76
+      Caption = 'Y Position ='
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -16
+      Font.Name = 'Times New Roman'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label6: TLabel
+      Left = 118
+      Height = 20
+      Top = 88
+      Width = 87
+      Caption = 'Angle Theta ='
+      Font.CharSet = ANSI_CHARSET
+      Font.Height = -16
+      Font.Name = 'Times New Roman'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentColor = False
+      ParentFont = False
+    end
+  end
+  object Edit1: TEdit
+    Left = 248
+    Height = 23
+    Top = 240
+    Width = 48
+    TabOrder = 10
+    Text = '0'
+  end
+  object Edit2: TEdit
+    Left = 248
+    Height = 23
+    Top = 280
+    Width = 48
+    TabOrder = 11
+    Text = '0'
+  end
+  object Edit3: TEdit
+    Left = 248
+    Height = 23
+    Top = 320
+    Width = 48
+    TabOrder = 12
+    Text = '0'
+  end
+  object EB_PositionY: TEdit
+    Left = 416
+    Height = 23
+    Top = 280
+    Width = 144
+    TabOrder = 13
+    Text = '0'
+  end
+  object EB_Theta: TEdit
+    Left = 416
+    Height = 23
+    Top = 320
+    Width = 144
+    TabOrder = 14
+    Text = '0'
+  end
+  object EB_PositionX: TEdit
+    Left = 416
+    Height = 23
+    Top = 240
+    Width = 144
+    TabOrder = 15
+    Text = '0'
+  end
+  object GroupBox4: TGroupBox
+    Left = 8
+    Height = 56
+    Top = 8
+    Width = 343
+    Caption = 'Start SimTwo Interface'
+    ClientHeight = 38
+    ClientWidth = 339
+    TabOrder = 16
+    object CB_SimTwo: TCheckBox
+      Left = 22
+      Height = 19
+      Top = 10
+      Width = 63
+      Caption = 'SimTwo'
+      OnChange = CB_SimTwoChange
+      TabOrder = 0
+    end
+    object Start: TButton
+      Left = 141
+      Height = 29
+      Top = 0
+      Width = 187
+      Caption = 'Config Communications'
+      OnClick = StartClick
+      TabOrder = 1
+    end
+  end
+  object Button5: TButton
+    Left = 360
+    Height = 49
+    Top = 159
+    Width = 200
+    Caption = 'Reset 5DPO Position'
+    OnClick = Button5Click
+    TabOrder = 17
+  end
+  object EB_Vref: TEdit
+    Left = 360
+    Height = 23
+    Top = 128
+    Width = 56
+    TabOrder = 18
+    Text = '8'
+  end
+  object Edit4: TEdit
+    Left = 608
+    Height = 23
+    Top = 56
+    Width = 80
+    TabOrder = 19
+    Text = '0'
+  end
+  object Edit5: TEdit
+    Left = 608
+    Height = 23
+    Top = 80
+    Width = 80
+    TabOrder = 20
+    Text = '0'
+  end
+  object Edit6: TEdit
+    Left = 608
+    Height = 23
+    Top = 104
+    Width = 80
+    TabOrder = 21
+    Text = '0'
+  end
+  object Edit7: TEdit
+    Left = 608
+    Height = 23
+    Top = 128
+    Width = 80
+    TabOrder = 22
+    Text = '0'
+  end
+  object Edit8: TEdit
+    Left = 608
+    Height = 23
+    Top = 152
+    Width = 80
+    TabOrder = 23
+    Text = '0'
+  end
+  object Edit9: TEdit
+    Left = 608
+    Height = 23
+    Top = 176
+    Width = 80
+    TabOrder = 24
+    Text = '0'
+  end
+  object Edit10: TEdit
+    Left = 608
+    Height = 23
+    Top = 200
+    Width = 80
+    TabOrder = 25
+    Text = '0'
+  end
+  object Edit11: TEdit
+    Left = 608
+    Height = 23
+    Top = 224
+    Width = 80
+    TabOrder = 26
+    Text = '0'
+  end
+  object Edit12: TEdit
+    Left = 608
+    Height = 23
+    Top = 248
+    Width = 80
+    TabOrder = 27
+    Text = '0'
+  end
+  object Edit13: TEdit
+    Left = 608
+    Height = 23
+    Top = 272
+    Width = 80
+    TabOrder = 28
+    Text = '0'
+  end
+  object Edit14: TEdit
+    Left = 608
+    Height = 23
+    Top = 296
+    Width = 80
+    TabOrder = 29
+    Text = '0'
+  end
+  object Edit15: TEdit
+    Left = 608
+    Height = 23
+    Top = 320
+    Width = 80
+    TabOrder = 30
+    Text = '0'
+  end
+  object Edit16: TEdit
+    Left = 696
+    Height = 23
+    Top = 56
+    Width = 80
+    TabOrder = 31
+    Text = '0'
+  end
+  object Edit17: TEdit
+    Left = 696
+    Height = 23
+    Top = 80
+    Width = 80
+    TabOrder = 32
+    Text = '0'
+  end
+  object Edit18: TEdit
+    Left = 696
+    Height = 23
+    Top = 104
+    Width = 80
+    TabOrder = 33
+    Text = '0'
+  end
+  object Edit19: TEdit
+    Left = 696
+    Height = 23
+    Top = 128
+    Width = 80
+    TabOrder = 34
+    Text = '0'
+  end
+  object Edit20: TEdit
+    Left = 696
+    Height = 23
+    Top = 152
+    Width = 80
+    TabOrder = 35
+    Text = '0'
+  end
+  object Edit21: TEdit
+    Left = 696
+    Height = 23
+    Top = 176
+    Width = 80
+    TabOrder = 36
+    Text = '0'
+  end
+  object Edit22: TEdit
+    Left = 696
+    Height = 23
+    Top = 200
+    Width = 80
+    TabOrder = 37
+    Text = '0'
+  end
+  object Edit23: TEdit
+    Left = 696
+    Height = 23
+    Top = 224
+    Width = 80
+    TabOrder = 38
+    Text = '0'
+  end
+  object Edit24: TEdit
+    Left = 696
+    Height = 23
+    Top = 248
+    Width = 80
+    TabOrder = 39
+    Text = '0'
+  end
+  object Edit25: TEdit
+    Left = 696
+    Height = 23
+    Top = 272
+    Width = 80
+    TabOrder = 40
+    Text = '0'
+  end
+  object Edit26: TEdit
+    Left = 696
+    Height = 23
+    Top = 296
+    Width = 80
+    TabOrder = 41
+    Text = '0'
+  end
+  object Edit27: TEdit
+    Left = 696
+    Height = 23
+    Top = 320
+    Width = 80
+    TabOrder = 42
+    Text = '0'
+  end
+  object Edit28: TEdit
+    Left = 376
+    Height = 23
+    Top = 32
+    Width = 80
+    TabOrder = 43
+    Text = '0'
+  end
+  object Edit29: TEdit
+    Left = 376
+    Height = 23
+    Top = 56
+    Width = 80
+    TabOrder = 44
+    Text = '0'
+  end
+  object Edit30: TEdit
+    Left = 376
+    Height = 23
+    Top = 81
+    Width = 80
+    TabOrder = 45
+    Text = '0'
+  end
+  object Edit31: TEdit
+    Left = 480
+    Height = 23
+    Top = 8
+    Width = 80
+    TabOrder = 46
+    Text = '0'
+  end
+  object Edit32: TEdit
+    Left = 480
+    Height = 23
+    Top = 32
+    Width = 80
+    TabOrder = 47
+    Text = '0'
+  end
+  object Edit33: TEdit
+    Left = 480
+    Height = 23
+    Top = 56
+    Width = 80
+    TabOrder = 48
+    Text = '0'
+  end
+  object Edit34: TEdit
+    Left = 480
+    Height = 23
+    Top = 80
+    Width = 80
+    TabOrder = 49
+    Text = '0'
+  end
+  object Edit35: TEdit
+    Left = 480
+    Height = 23
+    Top = 104
+    Width = 80
+    TabOrder = 50
+    Text = '0'
+  end
+  object Edit39: TEdit
+    Left = 480
+    Height = 23
+    Top = 128
+    Width = 80
+    TabOrder = 51
+    Text = '0'
+  end
+  object GroupBox5: TGroupBox
+    Left = 196
+    Height = 136
+    Top = 72
+    Width = 153
+    Caption = 'Controller Selection'
+    ClientHeight = 118
+    ClientWidth = 149
+    TabOrder = 52
+    object CBM: TCheckBox
+      Left = 18
+      Height = 19
+      Top = 8
+      Width = 89
+      Caption = 'Multivariable'
+      TabOrder = 0
+    end
+    object CBMPC: TCheckBox
+      Left = 18
+      Height = 19
+      Top = 48
+      Width = 55
+      Caption = 'NMPC'
+      TabOrder = 1
+    end
+    object GTXYT: TCheckBox
+      Left = 18
+      Height = 19
+      Top = 88
+      Width = 86
+      Caption = 'GoToXYTeta'
+      OnChange = GTXYTChange
+      TabOrder = 2
+    end
+  end
+  object RadioButton4: TRadioButton
+    Left = 33
+    Height = 19
+    Top = 168
+    Width = 32
+    Caption = 'P*'
+    OnChange = RadioButton3Change
+    TabOrder = 53
+  end
+  object Edit36: TEdit
+    Left = 696
+    Height = 23
+    Top = 5
+    Width = 80
+    TabOrder = 54
+    Text = '0'
+  end
+  object GroupBox6: TGroupBox
+    Left = 8
+    Height = 152
+    Top = 376
+    Width = 352
+    Caption = 'Time'
+    ClientHeight = 134
+    ClientWidth = 348
+    TabOrder = 55
+    OnClick = GroupBox6Click
+    object label_status: TLabel
+      Left = 22
+      Height = 16
+      Top = 16
+      Width = 33
+      Caption = 'Status'
+      ParentColor = False
+      OnClick = label_statusClick
+    end
+    object label_tempoTotal: TLabel
+      Left = 22
+      Height = 16
+      Top = 40
+      Width = 85
+      Caption = 'Total Time (ms)'
+      ParentColor = False
+    end
+    object label_mediaGeral: TLabel
+      Left = 22
+      Height = 16
+      Top = 64
+      Width = 114
+      Caption = 'General Average (ms)'
+      ParentColor = False
+    end
+    object btn_cliqueAqui: TButton
+      Left = 350
+      Height = 25
+      Top = 48
+      Width = 92
+      Caption = 'Encaique Aqui'
+      TabOrder = 0
+    end
+    object label_NIteracao: TLabel
+      Left = 22
+      Height = 16
+      Top = 88
+      Width = 111
+      Caption = 'Number of Iterations'
+      ParentColor = False
+      OnClick = label_NIteracaoClick
+    end
+  end
+  object GroupBox7: TGroupBox
+    Left = 384
+    Height = 152
+    Top = 376
+    Width = 384
+    Caption = 'Memory'
+    ClientHeight = 134
+    ClientWidth = 380
+    TabOrder = 56
+    OnClick = GroupBox7Click
+    object label_memoriaFisicaTotal: TLabel
+      Left = 25
+      Height = 16
+      Top = 16
+      Width = 130
+      Caption = 'Physical Memory (Total)'
+      ParentColor = False
+    end
+    object label_memoriaFisicaLivre: TLabel
+      Left = 25
+      Height = 16
+      Top = 40
+      Width = 125
+      Caption = 'Physical Memory (Free)'
+      ParentColor = False
+    end
+    object label_memoriaFisicaOcupada: TLabel
+      Left = 25
+      Height = 16
+      Top = 64
+      Width = 154
+      Caption = 'Physical Memory (Occupied)'
+      ParentColor = False
+    end
+    object label_percentMemoriaLivre: TLabel
+      Left = 25
+      Height = 16
+      Top = 88
+      Width = 155
+      Caption = 'Percentage of Memory (Free)'
+      ParentColor = False
+    end
+    object label_percentMemoriaOcup: TLabel
+      Left = 25
+      Height = 16
+      Top = 112
+      Width = 154
+      Caption = 'Physical Memory (Occupied)'
+      ParentColor = False
+    end
+  end
+  object IniPropStorage1: TIniPropStorage
+    StoredValues = <>
+    left = 560
+    top = 8
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = Timer1Timer
+    left = 729
+    top = 407
+  end
+  object Timer2: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = Timer2Timer
+    left = 306
+    top = 400
+  end
+end

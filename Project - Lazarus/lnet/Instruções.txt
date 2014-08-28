@@ -1,0 +1,5 @@
+Descompacta essa pasta, na pasta COMPONENTS, no diretório do Lazarus.
+
+Abre o Lazarus e abre o arquivo: lnetvisual.lpk
+
+Abrir pacote > Usar > Instalar > Ok. Aguarda e pronto.

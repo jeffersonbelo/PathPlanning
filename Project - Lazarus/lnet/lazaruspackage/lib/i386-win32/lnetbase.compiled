@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="C:\Desenvolvimento\lazarus\fpc\2.6.4\bin\i386-win32\fpc.exe" Date="1150455029"/>
+  <Params Value=" -MObjFPC -Sgim -CX -O2 -gs -gl -vew &quot;-FiC:\Users\Jeff\Desktop\Orientation\Source\Lazarus\Final Project\lnet\lib\sys&quot; &quot;-FuC:\Users\Jeff\Desktop\Orientation\Source\Lazarus\Final Project\lnet\lib&quot; &quot;-FuC:\Users\Jeff\Desktop\Orientation\Source\Lazarus\Final Project\lnet\lazaruspackage\&quot; &quot;-FUC:\Users\Jeff\Desktop\Orientation\Source\Lazarus\Final Project\lnet\lazaruspackage\lib\i386-win32\&quot; -l -dLNET_BASE lnetbase.pas"/>
+</CONFIG>

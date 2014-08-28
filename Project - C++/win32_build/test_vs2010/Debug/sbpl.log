@@ -1,0 +1,56 @@
+﻿Build started 12/03/2014 20:44:41.
+     1>Project "C:\Users\Jeff\Desktop\Versão 2.0 - C++\Adstar\sbpl - Cópia\win32_build\test_vs2010\sbpl.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating ".\Debug\sbpl.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Users\Jeff\Desktop\Desenvolvimento\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _CRT_SECURE_NO_DEPRECATE /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /FR".\Debug\\" /Gd /TP /analyze- /errorReport:prompt ..\..\src\utils\2Dgridsearch.cpp ..\..\src\planners\ADStar\adplanner.cpp ..\..\src\planners\ARAStar\araplanner.cpp ..\..\src\discrete_space_information\nav2d\environment_nav2D.cpp ..\..\src\discrete_space_information\nav2d_uu\environment_nav2duu.cpp ..\..\src\discrete_space_information\navxythetalat\environment_navxythetalat.cpp ..\..\src\discrete_space_information\navxythetalat\environment_navxythetamlevlat.cpp ..\..\src\discrete_space_information\robarm\environment_robarm.cpp ..\..\src\discrete_space_information\template\environment_XXX.cpp ..\..\src\utils\heap.cpp ..\..\src\test\main.cpp ..\..\src\utils\mdp.cpp ..\..\src\planners\PPCP\ppcpplanner.cpp ..\..\src\planners\RStar\rstarplanner.cpp ..\..\src\utils\utils.cpp ..\..\src\planners\VI\viplanner.cpp ..\..\src\planners\ANA\ANAplanner.cpp
+         ANAplanner.cpp
+         viplanner.cpp
+         utils.cpp
+         rstarplanner.cpp
+         ppcpplanner.cpp
+         mdp.cpp
+         main.cpp
+         heap.cpp
+         environment_XXX.cpp
+         environment_robarm.cpp
+         environment_navxythetamlevlat.cpp
+         environment_navxythetalat.cpp
+         environment_nav2duu.cpp
+         environment_nav2D.cpp
+         araplanner.cpp
+         adplanner.cpp
+         2Dgridsearch.cpp
+         Generating Code...
+       Link:
+         C:\Users\Jeff\Desktop\Desenvolvimento\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:".\Debug/sbpl.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:".\Debug\sbpl.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:".\Debug/sbpl.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\Debug\sbpl.lib" /MACHINE:X86 .\Debug/2Dgridsearch.obj
+         .\Debug/adplanner.obj
+         .\Debug/araplanner.obj
+         .\Debug/environment_nav2D.obj
+         .\Debug/environment_nav2duu.obj
+         .\Debug/environment_navxythetalat.obj
+         .\Debug/environment_navxythetamlevlat.obj
+         .\Debug/environment_robarm.obj
+         .\Debug/environment_XXX.obj
+         .\Debug/heap.obj
+         .\Debug/main.obj
+         .\Debug/mdp.obj
+         .\Debug/ppcpplanner.obj
+         .\Debug/rstarplanner.obj
+         .\Debug/utils.obj
+         .\Debug/viplanner.obj
+         .\Debug/ANAplanner.obj
+     1>2Dgridsearch.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+         sbpl.vcxproj -> C:\Users\Jeff\Desktop\Versão 2.0 - C++\Adstar\sbpl - Cópia\win32_build\test_vs2010\.\Debug\sbpl.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:".\Debug/sbpl.exe;#1" /manifest .\Debug\sbpl.exe.intermediate.manifest
+       BscMake:
+         C:\Users\Jeff\Desktop\Desenvolvimento\VC\bin\bscmake.exe /nologo /o".\Debug/sbpl.bsc" .\Debug\2Dgridsearch.sbr .\Debug\adplanner.sbr .\Debug\araplanner.sbr .\Debug\environment_nav2D.sbr .\Debug\environment_nav2duu.sbr .\Debug\environment_navxythetalat.sbr .\Debug\environment_navxythetamlevlat.sbr .\Debug\environment_robarm.sbr .\Debug\environment_XXX.sbr .\Debug\heap.sbr .\Debug\main.sbr .\Debug\mdp.sbr .\Debug\ppcpplanner.sbr .\Debug\rstarplanner.sbr .\Debug\utils.sbr .\Debug\viplanner.sbr .\Debug\ANAplanner.sbr
+       FinalizeBuildStatus:
+         Deleting file ".\Debug\sbpl.unsuccessfulbuild".
+         Touching ".\Debug\sbpl.lastbuildstate".
+     1>Done Building Project "C:\Users\Jeff\Desktop\Versão 2.0 - C++\Adstar\sbpl - Cópia\win32_build\test_vs2010\sbpl.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:30.69

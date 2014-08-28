@@ -1,0 +1,46 @@
+unit Map;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  ExtCtrls, IniPropStorage;
+
+type
+
+  { TFMap }
+
+  TFMap = class(TForm)
+    Image1: TImage;
+    IniPropStorage: TIniPropStorage;
+    procedure Image1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+  private
+    { private declarations }
+  public
+    { public declarations }
+  end; 
+
+var
+  FMap: TFMap;
+
+implementation
+uses AStar;
+
+{ TFMap }
+
+procedure TFMap.Image1MouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+var gx,gy: double;
+begin
+  gx := (2*x/100)-5;
+  gy := (2*y/100)-4;
+  FAStar.EditGxGy.text := format('%f,%f',[gx,gy]);
+end;
+
+initialization
+  {$I map.lrs}
+
+end.
+

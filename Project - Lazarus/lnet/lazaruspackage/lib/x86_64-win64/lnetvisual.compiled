@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Compiler Value="C:\Desenvolvimento\lazarus\fpc\2.6.2\bin\x86_64-win64\fpc.exe" Date="1131443479"/>
+  <Params Value=" -MObjFPC -Sgi -CX -O2 -gs -gl -vew &quot;-FuC:\Users\Jeff\Desktop\Lazarus\Final Project\lnet\lazaruspackage\lib\x86_64-win64&quot; -FuC:\Desenvolvimento\lazarus\ideintf\units\x86_64-win64\win32 -FuC:\Desenvolvimento\lazarus\lcl\units\x86_64-win64\win32 -FuC:\Desenvolvimento\lazarus\lcl\units\x86_64-win64 -FuC:\Desenvolvimento\lazarus\components\lazutils\lib\x86_64-win64 -FuC:\Desenvolvimento\lazarus\packager\units\x86_64-win64 &quot;-FuC:\Users\Jeff\Desktop\Lazarus\Final Project\lnet\lazaruspackage\&quot; &quot;-FUC:\Users\Jeff\Desktop\Lazarus\Final Project\lnet\lazaruspackage\lib\x86_64-win64\&quot; -l -dLCL -dLCLwin32 -dLNET_VISUAL lnetvisual.pas"/>
+</CONFIG>
