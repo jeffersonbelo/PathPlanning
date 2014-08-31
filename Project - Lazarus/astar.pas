@@ -599,10 +599,10 @@ begin
   result := true;
   for i:=0 to Num_obs-1 do begin
     // if we are inside the obstacle, then we definitely intersect
-    if (dist(st_x-obs[i].x,st_y-obs[i].y)<obs[i].r) then exit;
-    if CalcIntersectionPoint(st_x,st_y,tg_x,tg_y,ix,iy,obs[i]) then exit;
+    if (dist(st_x-obs[i].x,st_y-obs[i].y)<obs[i].r) then exit;       // Dist = sqrt(x²+y²) -> [dist < raioDoObstaculo ( SAIA )] tocou e tem obstáculo
+    if CalcIntersectionPoint(st_x,st_y,tg_x,tg_y,ix,iy,obs[i]) then exit;  // A interseção é calculada por delta, Se houver interseção SAIA - Pois há obstáculo
   end;
-  result := false;
+  result := false;       // Caso retorne falso é porque não há obstáculos
 end;
 
 
@@ -612,12 +612,12 @@ var i: integer;
 begin
 
   // if there are no obstacles in this segment, just return a simple trajectory straight to it
-  if not ObstacleInSegment(st_x,st_y,tg_x,tg_y,obs,num_obs) then begin
+  if not ObstacleInSegment(st_x,st_y,tg_x,tg_y,obs,num_obs) then begin    // Caso não tenha nenhum obstaculo presente no segmento, construa uma trajetória em linha reta que ligue o ponto atual ao o ponto objetivo.
     BuildSimpleTrajectory(traj, st_x, st_y, tg_x, tg_y);
     exit;
   end;
 
-  AStarGetBestPath(st_x, st_y, tg_x, tg_y, traj, obs, num_obs);
+  AStarGetBestPath(st_x, st_y, tg_x, tg_y, traj, obs, num_obs);  // Caso tenha obstáculos, planeje o caminho
 
 end;
 
