@@ -229,7 +229,7 @@ begin
   // if we are on the first node, there is no way to promote
   if idx = 0 then exit;
   // if not the first node, calc node cost
-  node_cost := CalcHeapCost(Map, idx); // return the F.
+  node_cost := CalcHeapCost(Map, idx); // return the F. result= G+H
 
   // repeat until we can promote no longer
   while true do begin
@@ -380,14 +380,14 @@ end;
 procedure AStarCheckBoundary(var pnt: TGridCoord; var Map: TAStarMap);
 var i, j, x, y: integer;
 begin
-  // if we are not inside an obstacle, just return
+  // if we are not inside an obstacle, just return ( Se não estiver dentro de um obstaculo, apenas saia
   if Map.GridState[pnt.x,pnt.y] <> AStarObstacle then exit;
 
   for i := 1 to AStarGridXSize - 1 do begin
     for j := 7 downto 0 do begin
       x := pnt.x + EightWayNeighbours[j].x * i;
       y := pnt.y + EightWayNeighbours[j].y * i;
-      if (x >= 0) and (y >= 0) and (x < AStarGridXSize) and (y < AStarGridYSize) then begin
+      if (x >= 0) and (y >= 0) and (x < AStarGridXSize) and (y < AStarGridYSize) then begin    // Verifica se está nos limites da vizinhanca
         if Map.GridState[x,y] <> AStarObstacle then begin
           pnt.x := x;
           pnt.y := y;
@@ -407,16 +407,16 @@ end;
 procedure AStarInit(var iMap: TAStarMap);
 begin
   zeromemory(@(iMap.Profile),sizeof(iMap.Profile));
-  AddToAStarList(iMap, iMap.InitialPoint);
+  AddToAStarList(iMap, iMap.InitialPoint);  //incluie o ponto na lista aberta e insere e atualiza a pilha
   iMap.Grid[iMap.InitialPoint.x, iMap.InitialPoint.y].H:= CalcH( iMap, iMap.InitialPoint, iMap.TargetPoint);
 end;
 
 procedure AStarGo(var iMap: TAStarMap);
 begin
-  AStarCheckBoundaries(iMap);
+  AStarCheckBoundaries(iMap); // verifique se o ponto dado está dentro de um obstáculo e movê-lo para o espaço aberto mais próximo
   AStarInit(iMap);
   while true do begin
-    AStarStep(iMap);
+    AStarStep(iMap); //AStar propriamente dito
 
     if iMap.GridState[iMap.TargetPoint.x, iMap.TargetPoint.y] = AStarClosed then break;
     // there is no path
@@ -494,7 +494,8 @@ var i, x, y: integer;
     ptl, pbr, cur_pnt: TGridCoord;
     wx,wy: double;
 begin
-  AStarClear(AStarMap);
+
+  AStarClear(AStarMap); // Método responsável em limpar o mapa e o heap (Lista Aberta), construir uma parede para não precisar se importar com os limites do campo
 
   for i := 0 to num_obs - 1 do begin
     with obs[i] do begin
@@ -524,7 +525,7 @@ begin
   AStarWorldToGrid(st_x, st_y, AStarMap.TargetPoint);
 
   AStarGo(AStarMap);  //limite, celulas livres (STAR)
-  AStarBuildTrajectory(st_x,st_y,tg_x,tg_y, AStarMap, traj);
+  AStarBuildTrajectory(st_x,st_y,tg_x,tg_y, AStarMap, traj);       // CONSTROI A TRAJETORIA ( FIM- INICIO )
 end;
 
 // -----------------------------------------------------------------------
