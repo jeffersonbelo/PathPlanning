@@ -41,45 +41,56 @@ using namespace std;
 RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchForward) // CONSTRUTOR
 {
 	bforwardsearch = bSearchForward; // Se TRUE a pesquisa será FORWARD, se falso BACKWARD
-
-    environment_ = environment; // Apenas cópia o ambiente do arquivo CFG passado por parametro.
-    
+ 
+	environment_ = environment; // Apenas cópia o ambiente do arquivo CFG passado por parametro para poder manipulá-lo sem receio.
+	
 	bsearchuntilfirstsolution = false; // Se TRUE, pesquisará apenas até encontrar a primeira solução e pronto (pára), caso FALSE, continuará pesquisando mesmo após encontrar a primeira solução.
-    finitial_eps = RSTAR_DEFAULT_INITIAL_EPS; // 5.0
-    highlevel_searchexpands = 0;
-    lowlevel_searchexpands = 0;
-    MaxMemoryCounter = 0;
     
-#ifndef ROS
-    const char* debug = "debug.txt";
-#endif
-    fDeb = SBPL_FOPEN(debug, "w");
-    if(fDeb == NULL){
+	finitial_eps = RSTAR_DEFAULT_INITIAL_EPS; // 5.0 ( valor inicial de W )
+    
+	highlevel_searchexpands = 0; // Número de expansoes de alto nivel já realizadas
+    
+	lowlevel_searchexpands = 0; // Número de expansoes de baixo nivel já realizadas
+    
+	MaxMemoryCounter = 0; // Contador de memória utilizada - [Por algum bug dá negativo - Verificar isso]
+
+	// PS: O que é uma expansão de alto ou de baixo nível ? [ Pesquisar ] - In other words, state structure for high level states in Gamma graph and low-level (local) search state in R*
+
+#ifndef ROS // Diretivas usadas para setar algumas configuras, caso o sistema seja ROS // DESPREZAR
+    const char* debug = "debug.txt"; // DESPREZAR
+#endif // DESPREZAR
+
+    fDeb = SBPL_FOPEN(debug, "w"); // Fdeb é do tipo arquivo, por dedução o primeiro parametro é o arquivo que deve ser aberto, no caso debug.txt(gerado automaticamente) e o segundo paramentro parece ser o comando de escrita [Só dedução, pode não ser isso]
+   
+	if(fDeb == NULL){ // Exceção simples caso o arquivo não exista ou não possa ser aberto [ o arquivo DEBUG não é prioridade ]
       SBPL_ERROR("ERROR: could not open planner debug file\n");
       throw new SBPL_Exception();
     }
-    SBPL_PRINTF("debug on\n");
+   
+	SBPL_PRINTF("debug on\n"); // Apenas imprimi no prompt a mensagem passada por parametro.
     
+	//PS: Qual a diferença de uma pesquisa LOCAL e GLOBAL ?
+
 	//create global searchstatespace
     pSearchStateSpace = new RSTARSearchStateSpace_t; // Instancia a variavel pSearchStateSpace, como um objeto da STRUCT RSTARSEARCHSTATESPACE para que possa executar seus métodos (RStarPlanner.h 230)
-	MaxMemoryCounter += sizeof(RSTARSearchStateSpace_t);
+	MaxMemoryCounter += sizeof(RSTARSearchStateSpace_t); // Sizeof  determines the size, in bytes, of a variable or data type. can be used to get the size of classes, structures, unions and any other user defined data type.
     
 	//create local searchstatespace
 	pLSearchStateSpace = new RSTARLSearchStateSpace_t;
 	MaxMemoryCounter += sizeof(RSTARLSearchStateSpace_t);
-    
-
-    
+       
     //create the RSTAR planner
-    if(CreateSearchStateSpace() != 1)  // Cria uma pilha com o GOAL e START = NULL, e deixa como FALSE a variável bReinitializeSearchStateSpace
+    if(CreateSearchStateSpace() != 1)  //cria (aloca memória) espaço de busca, Cria a lista ABERTA
         {
-            SBPL_ERROR("ERROR: failed to create statespace\n");
+            SBPL_ERROR("ERROR: failed to create statespace\n"); // Caso não for 1 o retorno, lança alguma exceção
             return;
         }
     
     //set the start and goal states
-    if(InitializeSearchStateSpace() != 1) // Verifica se a lista OPEN está vazia, caso esteja, inicializa algumas variáveis de controle de busca (eps, searchIteration ... ), 
-										  // Deixa novamente o GOAL e START = NULL, mas dessa vez deixa como TRUE a váriavel breinicializarOEspacoDeBusca
+    if(InitializeSearchStateSpace() != 1)   // Verifica se a lista aberta está vazia e define algumas variaveis, tais como: eps(w) = 5,0, eps_satisfied = INFINITO, searchIterator = 0  é incrementado a cada pesquisa R* (e resetado após cada incremento de CallNumber)
+											// informa que essa é uma nova iteração, callnumber =0; é incrementado a cada chamada do R*, bReevaluatefvals = false; // need to reevaluate fvals, 
+											//e então reinicializa o estado de busca - breinitializeSearchStateSpace = true; // Reinicializa o espaço de busca
+										    // ainda não define GOAL e START = NULL
         {
             SBPL_ERROR("ERROR: failed to create statespace\n");
             return;
@@ -90,19 +101,19 @@ RSTARPlanner::~RSTARPlanner() // DESTRUTOR
 {
   if(pSearchStateSpace != NULL){
     //delete the statespace
-    DeleteSearchStateSpace();
+    DeleteSearchStateSpace(); // deallocates memory used by SearchStateSpace
     delete pSearchStateSpace;
   }
   SBPL_FCLOSE(fDeb);
 }
 
 
-void RSTARPlanner::Initialize_searchinfo(CMDPSTATE* state)
-{
+void RSTARPlanner::Initialize_searchinfo(CMDPSTATE* state){
 
-	RSTARState* searchstateinfo = (RSTARState*)state->PlannerSpecificData; // Ponteiro que armazena o valor NULL
+	RSTARState* searchstateinfo = (RSTARState*)state->PlannerSpecificData; // Ponteiro que armazena informações especificas do planejador [G, IteractionClosed, CallNumberAccessed, HeapIndex, BestPredAction]  Olhar no Debug o valor durante a execução ]
 
-	searchstateinfo->MDPstate = state; // MDP é o próprio estado.
+	searchstateinfo->MDPstate = state; // atualiza as informações sobre o proprio estado MDP recebidas por parametro
+	
 	InitializeSearchStateInfo(searchstateinfo); // Inicializa os atributos de controle do estado ( G, IteractionClosed, CallNumberAccessed, HeapIndex, BestPredAction ... )
 }
 
@@ -125,7 +136,8 @@ CMDPSTATE* RSTARPlanner::CreateState(int stateID)
 	//remember the index of the state
 	environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND] = pSearchStateSpace->searchMDP.StateArray.size()-1;
 	
-	//NOMECLATURA: StateID2IndexMapping [100] [0] = 5 significa que hashentry com stateID 100 é mapeado para o índice de pesquisa = 5 em busca 0 
+	//NOMECLATURA: used in environment to contain the coordinates of a state, say x,y or x,y,theta, usado para mapear o ambiente.
+	//StateID2IndexMapping [100][0] = 5 significa que hashentry com stateID 100 é mapeado para o índice de pesquisa = 5 em busca 0 
     //O valor -1 significa que nenhum Estado busca foi criado ainda para este hashentry
 
 #if DEBUG
@@ -138,7 +150,7 @@ CMDPSTATE* RSTARPlanner::CreateState(int stateID)
 
 
 	//create search specific info
-	state->PlannerSpecificData = new RSTARState; // Por padrão, também é NULL	
+	state->PlannerSpecificData = new RSTARState; // Cria um estado no R*, contendo todas informações.	
 	MaxMemoryCounter += sizeof(RSTARState);
 	Initialize_searchinfo(state);
 
@@ -961,7 +973,7 @@ void RSTARPlanner::Reevaluatefvals()
 
 //creates (allocates memory) search state space
 //does not initialize search statespace
-int RSTARPlanner::CreateSearchStateSpace()
+int RSTARPlanner::CreateSearchStateSpace() 
 {
 
 	//create a heap
