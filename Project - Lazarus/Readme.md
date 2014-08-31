@@ -27,66 +27,60 @@ Alguns detalhes analisados:
 
 				
 	2 - AStarGetBestPath(st_x, st_y, tg_x, tg_y, traj, obs, num_obs); - Linha 491.
-		Esse método recebe os pontos X e Y do ponto inicial e final, a trajetória gerada, os obstáculos presente no mapa [x,y,r] e o número deles. O mesmo é responsável em executar todas as ações necessárias para que seja planejada e executada uma trajetória que interligue o ponto incial ao ponto objetivo, desviando os obstáculos existentes. 
+		Esse método recebe os pontos X e Y do ponto inicial e final, a trajetória gerada, os obstáculos presente no mapa [x,y,r] e o número deles. O mesmo é responsável em executar todas as ações necessárias para que seja planejada e executada uma trajetória que interligue o ponto incial ao ponto objetivo, desviando os obstáculos existentes. Para que isso seja feito é executado a procedure ...
 		
-				Para que isso seja feito, inicialmente, é executado a procedure AStarClear(var iMap: TAStarMap); - Linha 162, esse é responsável em limpar o mapa (caso exista alguma informação nele) e setar todos os nós para virgens (Não visitados ainda), bem como construir uma parede para não precisar se importar com os limites do campo e simplificar a execução do planejador, por fim ele limpa o contador da pilha. 
-		
+		AStarClear(var iMap: TAStarMap); - Linha 162,
+			Esse é responsável em limpar o mapa (caso exista alguma informação nele) e setar todos os nós para virgens (Não visitados ainda), bem como construir uma parede para não precisar se importar com os limites do campo e simplificar a execução do planejador, por fim ele limpa o contador da pilha. 
 							
-				Em seguida é feita alguma transformação geometrica ( TIRAR DÚVIDAS COM O PROFESSOR ) 
-				Linha 500 (AStar) bem como perguntar o que é esse traj passado por parametro, são todas as trajetórias possiveis, recebidas pelo decomposição por celulas (contendo a informação geral do grafo) ou alguma trajetoria especifica (contendo informação especifica de uma iteracao ), perguntar tambem a linha 523-525
+			Em seguida é feita alguma transformação geometrica ( TIRAR DÚVIDAS COM O PROFESSOR ) 
+			Linha 500 (AStar) bem como perguntar o que é esse traj passado por parametro, são todas as trajetórias possiveis, recebidas pelo decomposição por celulas (contendo a informação geral do grafo) ou alguma trajetoria especifica (contendo informação especifica de uma iteracao ), perguntar tambem a linha 523-525 em seguida é executada a procedure ...
 				
 						
-				Logo em seguida é executado a procedure AStarGo(var iMap: TAStarMap); - Linha 414
-				a mesma é a responsável em executar todas as ações necessária para que o planejador A* funcione.
+	3 - AStarGo(var iMap: TAStarMap); - Linha 414
+		A mesma é a responsável em executar todas as ações necessária para que o planejador A* funcione. Imediatamente é já é executada a procedure ...
 				
-					De inicio é executada a procedure AStarCheckBoundaries(var Map: TAStarMap); - Linha 401
-					Que tem por objetivo checar alguns limites do campo
-						Ele executa duas vezes a procedure AStarCheckBoundary(var pnt: TGridCoord; var Map: TAStarMap); Que tem como objetivo verificar se o ponto passado por parametro está ou não dentro de um obstáculo e se sim, move o mesmo para um espaço aberto.
-						( Perguntar ao professor sobre isso ) 
+		AStarCheckBoundaries(var Map: TAStarMap); - Linha 401
+		A mesma tem o objetivo  checar alguns limites do campo e verificar se o mesmo está todo ok;
+		
+			Ele executa duas vezes a procedure AStarCheckBoundary(var pnt: TGridCoord; var Map: TAStarMap); 
+			Que tem como objetivo verificar se o ponto passado por parametro está ou não dentro de um obstáculo e se sim, move o mesmo para um espaço aberto.
+			( Perguntar ao professor como é esse comportamente ) 
+			Em seguinda, é executa a procedure ...
 						
-					Em seguida é executada a procedure AStarInit(var iMap: TAStarMap);    - Linha 407
-					A mesma executa a procedure AddToAStarList( var Map: TAStarMap; Pnt: TGridCoord); Linha 314. Que tem como objetivo adciona o ponto  inicial do mapa a lista aberta, para isso a mesma: 
-						Incrementa o contador e define o estado passado por parametro com o valor 3 ( valor que informa ao programa que a celula está na lista aberta, em seguida esse ponto é inserida na pilha e executada a UpdateHeapPositionByPromotion(Map, idx); - Linha 225,
-						verifica se haverá alguma atualização dos BPs.
+	4 - AStarInit(var iMap: TAStarMap);    - Linha 407	
+		A mesma executa a procedure AddToAStarList( var Map: TAStarMap; Pnt: TGridCoord); Linha 314. 
+			Essa tem como objetivo adciona o ponto  inicial do mapa a lista aberta, para isso a mesma: 
 						
-						Logo em seguida é definido o H do ponto inicial, através da função CalcH(var Map: TAStarMap; Pi, Pf: TGridCoord): integer;  inline; 
+						Incrementa o contador e define o estado passado por parametro com o valor 3 ( valor que informa ao programa que a celula está na lista aberta ), 
+						
+						em seguida esse ponto é inserida na pilha e executada a procedure UpdateHeapPositionByPromotion(Map, idx); - Linha 225, que verificará se haverá alguma atualização (promoção) dos pais (Bps) presente na pilha. 
+						
+						Logo em seguida, quando finaliza a promoção, é definido o H do ponto inicial, através da função CalcH(var Map: TAStarMap; Pi, Pf: TGridCoord): integer;  inline; - Linha 333.
+				
+		Após incluir o ponto inicial na lista aberta e definir seu H o código entra em um ciclo de repetição que executa:
+						
+	5 - AStarStep(var iMap: TAStarMap); - Linha 338
+		Responsável em executar o passo a passo de busca do A*
+			Inicialmente é incrementado as variaveis de iteração e contadoras de pilha, posteriormente é executada a procedure RemoveBestFromAStarList(var iMap: TAStarMap; out Pnt: TGridCoord); - Linha 297
+				
+				É incrementado o contador de remoção
+			
+				É retornado o primeiro nó, move o ultimo nó para a primeira posicao e decresce o tamanho do array. 
+			
+			Logo após é executado a procedure UpdateHeapPositionByDemotion(var Map: TAStarMap; idx: integer); - Linha 249.
+			A mesma tem como objetivo rebaixar os parents antigos, caso não encontre um bp melhor.  
 					
-					Após incluir o ponto inicial na lista aberta e definir seu H o código entra em um ciclo de repetição que executa:
-						procedure AStarStep(var iMap: TAStarMap); - Linha 338
-						
-							Inicialmente é incrementado as variaveis de iteração e contadoras de pilha
-							posteriormente é executada a procedure RemoveBestFromAStarList(var iMap: TAStarMap; out Pnt: TGridCoord);    - Linha 297
-								É incrementado o contador de remoção
-								É retonrado o primeiro nó, move o ultimo nó para a primeira posicao e decresce o tamanho do array. Logo após é executado a procedure UpdateHeapPositionByDemotion(var Map: TAStarMap; idx: integer); que tem como objetivo rebaixar os parents antigos, caso não encontre um bp melhor.  
+		Em seguida é colocado o ponto atual na lista fechada, definindo o mesmo com o numero 2, e é definido que a vizinha terá 8 nós. 
+		
+		Em seguida, essa vizinhança é avançada, definindo os novos 8 analisados e é executado alguns blocos CASES. 
 					
-					Em seguida é colocado o ponto atual na lista fechada, definindo o mesmo com o numero 2 e avança a vizinhança, definindo os novos 8 analisados. 
-					
-						Caso o novo ponto já esteja na lista fechada, despreze. 
+			Caso o novo ponto já esteja na lista fechada, despreze esse. 
 						
-						Caso o nó seja virgem, é setado o seu pai e calculado o seu G e H e em seguida incluido na lista aberta - Linha 314.
+			Caso o nó seja virgem, é setado o seu pai e é calculado o seu G e H e em seguida incluido na lista aberta - Linha 314.
 					
-						Caso o nó esteja na aberta
-						Será setado o seu G e verificará se o G atual é menor que G de um nó já presente na aberta, se for menor troca o pai para o nó atual e recalcula e atualiza as posições na pilha.
-						
+			Caso o nó esteja na lista aberta, será setado o seu G e verificará se o G atual é menor que G de um nó já presente na aberta, se for, é trocado o pai do nó para o nó atual e recalcula e atualiza as posições na pilha.
 						
 					Após colocar o target na lista fechada é localizado o objetivo e o laço é interrompido a outra condição de parada é se o contador da pilha chegar a 0, quer dizer que não existe solução.
 
-					Após finalizar essa parte, é executada a ultima parte a linha 528, 
-					AStarBuildTrajectory(st_x,st_y,tg_x,tg_y, AStarMap, traj); que tem como objetivo executar a trajetória localizada ( PEDIR EXPLICAÇÃO AO PROFESSOR ) 
-Caso o contrário é a					ou o contador da Heap =0	
-						
-					
-				
-	
-	
-	
-	
-	
-	
-	
-	3 - AStarClear
-	4 - AStarGo
-	5 - AStarCheckBoudaries
-	6 - StarInit
-	7 - AddToAStarList
-	8 - AStarStep
+	6 - Após finalizar esse LOOP, é executada a ultima parte do código,o AStarBuildTrajectory(st_x,st_y,tg_x,tg_y, AStarMap, traj); - Linha 435
+	Esse tem como objetivo executar a trajetória localizada ( PEDIR EXPLICAÇÃO AO PROFESSOR ) 
