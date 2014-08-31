@@ -314,19 +314,19 @@ end;
 procedure AddToAStarList( var Map: TAStarMap; Pnt: TGridCoord);
 var idx: integer;
 begin
-  inc(Map.Profile.AddToAStarList_count);
+  inc(Map.Profile.AddToAStarList_count);   // Incrementa o contador da lista aberta
 
   // update the grid state
-  Map.GridState[Pnt.x, Pnt.y]:=AStarOpen;
+  Map.GridState[Pnt.x, Pnt.y]:=AStarOpen;  // Define o código do estado como 3 (Pertencente a lista aberta)
 
   // insert at the bottom of the heap
-  idx := Map.HeapArray.count;
-  Map.HeapArray.data[idx] := @Map.Grid[Pnt.x,Pnt.y];
+  idx := Map.HeapArray.count;    // armazena na variavel idx o contador da pilha
+  Map.HeapArray.data[idx] := @Map.Grid[Pnt.x,Pnt.y]; // no indice idx, armazena o valor do ponteiro
   Map.Grid[Pnt.x,Pnt.y].HeapIdx := idx;
   Inc(Map.HeapArray.count);
 
   // update by promotion up to the right place
-  UpdateHeapPositionByPromotion(Map, idx);
+  UpdateHeapPositionByPromotion(Map, idx);     // verifica se haverá alguma atualização dos BPs
 end;
 
 // Recebe um ponto inicial e o final do mapa, e calcula o H entre eles.
@@ -344,12 +344,12 @@ begin
   inc(iMap.Profile.iter);
   inc(iMap.Profile.HeapArrayTotal, iMap.HeapArray.count);
 
-  RemoveBestFromAStarList(iMap,curPnt);
-  iMap.GridState[curPnt.x,curPnt.Y]:=AStarClosed;
+  RemoveBestFromAStarList(iMap,curPnt); // qual o conteudo de curPnt
+  iMap.GridState[curPnt.x,curPnt.Y]:=AStarClosed; // inclui a lista fechada
 
   NeighboursCount := 8;
   for ith:=0 to NeighboursCount-1 do begin
-    NewPnt.x := CurPnt.x + EightWayNeighbours[ith].x;
+    NewPnt.x := CurPnt.x + EightWayNeighbours[ith].x;    //responsavel em fazer o quadrado dois 8 avançar
     NewPnt.y := CurPnt.y + EightWayNeighbours[ith].y;
 
     case iMap.GridState[NewPnt.x, NewPnt.y] of
@@ -413,7 +413,7 @@ end;
 
 procedure AStarGo(var iMap: TAStarMap);
 begin
-  AStarCheckBoundaries(iMap); // verifique se o ponto dado está dentro de um obstáculo e movê-lo para o espaço aberto mais próximo
+  AStarCheckBoundaries(iMap); // verifique se o ponto dado está dentro de um obstáculo e movê-lo para o espaço aberto mais próximo ( que ponto é esse ? )
   AStarInit(iMap);
   while true do begin
     AStarStep(iMap); //AStar propriamente dito
@@ -497,9 +497,10 @@ begin
   AStarClear(AStarMap); // Método responsável em limpar o mapa e o heap (Lista Aberta), construir uma parede para não precisar se importar com os limites do campo
 
   for i := 0 to num_obs - 1 do begin
-    with obs[i] do begin
-      AStarWorldToGrid(x - r, y - r, ptl);
-      AStarWorldToGrid(x + r, y + r, pbr);
+    with obs[i] do begin                      // O que armazena essas variaveis x - r?
+      AStarWorldToGrid(x - r, y - r, ptl);    // Recebe X,Y e um ponto   X,y (coordenada do nó) pnt (o que seria o ponto ? valor de F,G H? )
+      AStarWorldToGrid(x + r, y + r, pbr);     // Recebe os valores de X e Y e pnt do MUNDO e através desse localiza os valores X e Y no grafo do AStar, garantindo que esse não será negativo e nem maior que o campo
+
     end;
     for x := ptl.x to pbr.x do begin
       cur_pnt.x := x;
@@ -523,8 +524,8 @@ begin
   AStarWorldToGrid(tg_x, tg_y, AStarMap.InitialPoint);
   AStarWorldToGrid(st_x, st_y, AStarMap.TargetPoint);
 
-  AStarGo(AStarMap);  //limite, celulas livres (STAR)
-  AStarBuildTrajectory(st_x,st_y,tg_x,tg_y, AStarMap, traj);       // CONSTROI A TRAJETORIA ( FIM- INICIO )
+  AStarGo(AStarMap);  // A*
+  AStarBuildTrajectory(st_x,st_y,tg_x,tg_y, AStarMap, traj);       // CONSTROI A TRAJETORIA passada pelo A* (Fim-INICIO )
 end;
 
 // -----------------------------------------------------------------------
@@ -617,7 +618,7 @@ begin
     exit;
   end;
 
-  AStarGetBestPath(st_x, st_y, tg_x, tg_y, traj, obs, num_obs);
+  AStarGetBestPath(st_x, st_y, tg_x, tg_y, traj, obs, num_obs);  // Caso tenha obstáculos.
 
 end;
 
