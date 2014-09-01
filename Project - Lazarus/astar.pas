@@ -162,9 +162,9 @@ end;
 procedure AStarClear(var iMap: TAStarMap);
 var i: integer;
 begin
-  // clear the grid, set all nodes to state "virgin"
-  FillChar(iMap.GridState,sizeof(TAStarGridState), ord(AStarVirgin));
-
+  // clear the grid, set all nodes to state "virgin"                     //FillChar - Procedimento que inicializa uma variável string com caracteres repetitivos.
+  FillChar(iMap.GridState,sizeof(TAStarGridState), ord(AStarVirgin));   // ORd retorna o valor numérico de um caractere (na tabela ASCII). 'C' ele retorna 67    Em resumo ele vai setar todas as variaveis com 0
+                                                                        //FillChar(RecordQContemAsVariaveis, SizeOf(RecVariaveis), 0);
   // Build the wall around the grid,
   // this way, we don't have to worry about the frontier conditions
   for i:=0 to AStarGridXSize-1 do begin
@@ -349,7 +349,7 @@ begin
 
   NeighboursCount := 8;
   for ith:=0 to NeighboursCount-1 do begin
-    NewPnt.x := CurPnt.x + EightWayNeighbours[ith].x;    //responsavel em fazer o quadrado dois 8 avançar
+    NewPnt.x := CurPnt.x + EightWayNeighbours[ith].x;    //responsavel em fazer o quadrado dois 8 avançar e avaliar a próxima vizinhanca
     NewPnt.y := CurPnt.y + EightWayNeighbours[ith].y;
 
     case iMap.GridState[NewPnt.x, NewPnt.y] of
@@ -385,7 +385,7 @@ begin
 
   for i := 1 to AStarGridXSize - 1 do begin
     for j := 7 downto 0 do begin
-      x := pnt.x + EightWayNeighbours[j].x * i;
+      x := pnt.x + EightWayNeighbours[j].x * i;         // para que serve essa parte ?
       y := pnt.y + EightWayNeighbours[j].y * i;
       if (x >= 0) and (y >= 0) and (x < AStarGridXSize) and (y < AStarGridYSize) then begin    // Verifica se está nos limites da vizinhanca
         if Map.GridState[x,y] <> AStarObstacle then begin
@@ -490,7 +490,7 @@ end;
 
 procedure AStarGetBestPath(st_x,st_y,tg_x,tg_y: double; var traj: TTrajectory; var obs: array of TRoundObstacle; num_obs: integer);
 var i, x, y: integer;
-    ptl, pbr, cur_pnt: TGridCoord;
+    ptl, pbr, cur_pnt: TGridCoord;   // O que são armazenados nessas variaveis locais?
     wx,wy: double;
 begin
 
@@ -504,7 +504,7 @@ begin
     end;
     for x := ptl.x to pbr.x do begin
       cur_pnt.x := x;
-      for y := ptl.y to pbr.y do begin
+      for y := ptl.y to pbr.y do begin          //Dúvida: Qual a aplicação desse 1 e 2 for
         cur_pnt.y := y;
         AStarGridToWorld(cur_pnt, wx, wy);
         if Dist(wx - obs[i].x, wy - obs[i].y) < obs[i].r then begin
