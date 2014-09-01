@@ -84,3 +84,32 @@ Alguns detalhes analisados:
 
 	6 - Após finalizar esse LOOP, é executada a ultima parte do código,o AStarBuildTrajectory(st_x,st_y,tg_x,tg_y, AStarMap, traj); - Linha 435
 	Esse tem como objetivo executar a trajetória localizada ( PEDIR EXPLICAÇÃO AO PROFESSOR ) 
+	
+	
+	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	RESUMO DO A*: 
+	
+	1) Adicione o quadrado inicial à lista aberta.
+
+	2) Repita o seguinte:
+
+		a. Procure o quadrado que tenha o menor custo de F na lista aberta. Nós referimos a isto como o quadrado corrente.
+
+		b. Mova-o para a lista fechada.
+
+		c. Para cada um dos 8 quadrados adjacente a este quadrado corrente.
+
+            i. Se não é passável ou se estiver na lista fechada, ignore. Caso contrário faça o seguinte:
+
+				1. Se não estiver na lista aberta, acrescente-o à lista aberta. Faça o quadrado atual o pai deste quadrado. Grave os custos F, G, e H do quadrado. 
+
+				2. Se já estiver na lista aberta, confere para ver se este caminho para aquele quadrado é melhor, usando custo G como medida. Um valor G mais baixo mostra que este é um caminho melhor. Nesse caso, mude o pai do quadrado para o quadrado atual, e recalcule os valores de G e F do quadrado. Se você está mantendo sua lista aberta ordenada por F, você pode precisar reordenar a lista para corresponder a mudança.
+
+		d. Pare quando você:
+
+			i. Acrescente o quadrado alvo à lista fechada o que determina que o caminho foi achado, ou
+
+            ii. Não ache o quadrado alvo, e a lista aberta está vazia. Neste caso, não há nenhum caminho.   
+
+	3)       Salve o caminho. Caminhando para trás do quadrado alvo, vá de cada quadrado a seu quadrado pai até que você alcance o quadrado inicial. Isso é seu caminho. 
