@@ -38,63 +38,71 @@ using namespace std;
 //-----------------------------------------------------------------------------------------------------
 
 // Construtor que inicializa algumas variaveis de controle e faz copia o conteudo das variaveis passada por parametro para manipulá-las durante a execução do programa.
-RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchForward) // CONSTRUTOR
-{
-	bforwardsearch = bSearchForward; // Se TRUE a pesquisa será FORWARD, se falso BACKWARD
+RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchForward){ // CONSTRUTOR
+
+	bforwardsearch = bSearchForward;	                      // Variavel passada por parametro pelo o método MAIN. Se TRUE a pesquisa será FORWARD, se falso BACKWARD. Esse valor é guardado na variavel "bforwardsearch"
+										                      // Para poder se manipulado livremente
  
-	environment_ = environment; // Apenas cópia o ambiente do arquivo CFG passado por parametro para poder manipulá-lo sem receio.
+	environment_ = environment;			                      // Apenas cópia o ambiente do arquivo CFG passado por parametro para poder manipulá-lo sem receio.
 	
-	bsearchuntilfirstsolution = false; // Se TRUE, pesquisará apenas até encontrar a primeira solução e pronto (pára), caso FALSE, continuará pesquisando mesmo após encontrar a primeira solução.
+	bsearchuntilfirstsolution = false;                        //se FALSE, então o planejador alocará o tempo máximo para localizar e melhorar a solução "allocatime_time_sec", independentemente de ele encontrar uma solução ou não (modo padrão)
+										                      // se TRUE, então o planejador pesquisará até encontrar a primeira solução e pára, não gastando tempo na melhoria da solução, mesmo se houver tempo disponivel, 
+										                      // normalmente bSearchUntilFirstSolution deve ser definido como false 
+	
     
-	finitial_eps = RSTAR_DEFAULT_INITIAL_EPS; // 5.0 ( valor inicial de W )
+	finitial_eps = RSTAR_DEFAULT_INITIAL_EPS;                  // 5.0 ( valor inicial de W ) o mesmo é decrescido na importância de 0.2 até chegar 1.0 
     
-	highlevel_searchexpands = 0; // Número de expansoes de alto nivel já realizadas
+	highlevel_searchexpands = 0;                               // Número de expansoes de alto nivel já realizadas ( gráfico GAMA )
     
-	lowlevel_searchexpands = 0; // Número de expansoes de baixo nivel já realizadas
-    
-	MaxMemoryCounter = 0; // Contador de memória utilizada - [Por algum bug dá negativo - Verificar isso]
+	lowlevel_searchexpands = 0;                                // Número de expansoes de baixo nivel já realizadas ( busca local )
 
-	// PS: O que é uma expansão de alto ou de baixo nível ? [ Pesquisar ] - In other words, state structure for high level states in Gamma graph and low-level (local) search state in R*
+	//In other words, state structure for high level states in Gamma graph and low-level (local) search state in R*
+    
+	MaxMemoryCounter = 0;                                      // Contador de memória utilizada - [Por algum bug dá negativo - Verificar isso depois]	
 
-#ifndef ROS // Diretivas usadas para setar algumas configuras, caso o sistema seja ROS // DESPREZAR
-    const char* debug = "debug.txt"; // DESPREZAR
-#endif // DESPREZAR
 
-    fDeb = SBPL_FOPEN(debug, "w"); // Fdeb é do tipo arquivo, por dedução o primeiro parametro é o arquivo que deve ser aberto, no caso debug.txt(gerado automaticamente) e o segundo paramentro parece ser o comando de escrita [Só dedução, pode não ser isso]
+
+#ifndef ROS							                           // [IGNORAR] Diretivas usadas para setar algumas configuras, caso o sistema seja ROS // DESPREZAR
+    const char* debug = "debug.txt";                           // [IGNORAR] DESPREZAR
+#endif								                           // [IGNORAR] DESPREZAR
+
+    fDeb = SBPL_FOPEN(debug, "w");                             // [IGNORAR] Fdeb é do tipo arquivo, por dedução o primeiro parametro é o arquivo que deve ser aberto, no caso debug.txt(gerado automaticamente) e o segundo paramentro parece ser o comando de escrita [Só dedução, pode não ser isso]
    
-	if(fDeb == NULL){ // Exceção simples caso o arquivo não exista ou não possa ser aberto [ o arquivo DEBUG não é prioridade ]
-      SBPL_ERROR("ERROR: could not open planner debug file\n");
-      throw new SBPL_Exception();
+	if(fDeb == NULL){				                           // [IGNORAR] Exceção simples caso o arquivo não exista ou não possa ser aberto [ o arquivo DEBUG não é prioridade ]
+      SBPL_ERROR("ERROR: could not open planner debug file\n");// [IGNORAR] Desprezar
+      throw new SBPL_Exception();                              // [IGNORAR] Desprezar
     }
    
-	SBPL_PRINTF("debug on\n"); // Apenas imprimi no prompt a mensagem passada por parametro.
+	SBPL_PRINTF("debug on\n");		                           // [IGNORAR] Apenas imprimi no prompt a mensagem passada por parametro.
     
-	//PS: Qual a diferença de uma pesquisa LOCAL e GLOBAL ?
-
 	//create global searchstatespace
-    pSearchStateSpace = new RSTARSearchStateSpace_t; // Instancia a variavel pSearchStateSpace, como um objeto da STRUCT RSTARSEARCHSTATESPACE para que possa executar seus métodos (RStarPlanner.h 230)
-	MaxMemoryCounter += sizeof(RSTARSearchStateSpace_t); // Sizeof  determines the size, in bytes, of a variable or data type. can be used to get the size of classes, structures, unions and any other user defined data type.
+    pSearchStateSpace = new RSTARSearchStateSpace_t;           // Cria uma busca global com os seguintes com os seguinte atributos, 
+													           // eps, eps_satisfied, OPEN, seachitation, callnumber, searchgoalstate, searchstartstate, seachMDP, 
+													           // bReevalueatefVals, bReinitializeSearchStateSpace, bNewSeachIteration
+	
+	MaxMemoryCounter += sizeof(RSTARSearchStateSpace_t);       // [IGNORAR] Atualiza o contador de memória, Sizeof  determines the size, in bytes, of a variable or data type. 
+														       // can be used to get the size of classes, structures, unions and any other user defined data type.
     
 	//create local searchstatespace
-	pLSearchStateSpace = new RSTARLSearchStateSpace_t;
-	MaxMemoryCounter += sizeof(RSTARLSearchStateSpace_t);
-       
+	pLSearchStateSpace = new RSTARLSearchStateSpace_t;         // Cria uma busca local com os seguintes com os seguinte atributos, 
+   														       // MDP (grafico construido pela pesquisa local), StartState, goalState, iteration, 
+														       //[lista] open, [lista] incons (usada na busca suboptimal) 
+
+	MaxMemoryCounter += sizeof(RSTARLSearchStateSpace_t);      // [IGNORAR] Atualiza novamente o contador de memória,
+        
     //create the RSTAR planner
-    if(CreateSearchStateSpace() != 1)  //cria (aloca memória) espaço de busca, Cria a lista ABERTA
-        {
-            SBPL_ERROR("ERROR: failed to create statespace\n"); // Caso não for 1 o retorno, lança alguma exceção
-            return;
-        }
+    if(CreateSearchStateSpace() != 1){                         //Instancia a lista aberta pertencente pSearchStateSpace, Seta o estado Start e Goal como nulo e por fim a variavel 
+															   //bReinitializeSearchStateSpace = false (Reseta o numero de iteracoes, limpa a lista aberta, reinializa Eps e eps_satisfied ... Entre outras coisas)
+															   // se tudo de certo retorna 1
+       SBPL_ERROR("ERROR: failed to create statespace\n");     
+     return;
+    }
     
     //set the start and goal states
-    if(InitializeSearchStateSpace() != 1)   // Verifica se a lista aberta está vazia e define algumas variaveis, tais como: eps(w) = 5,0, eps_satisfied = INFINITO, searchIterator = 0  é incrementado a cada pesquisa R* (e resetado após cada incremento de CallNumber)
-											// informa que essa é uma nova iteração, callnumber =0; é incrementado a cada chamada do R*, bReevaluatefvals = false; // need to reevaluate fvals, 
-											//e então reinicializa o estado de busca - breinitializeSearchStateSpace = true; // Reinicializa o espaço de busca
-										    // ainda não define GOAL e START = NULL
-        {
-            SBPL_ERROR("ERROR: failed to create statespace\n");
-            return;
-        }    
+    if(InitializeSearchStateSpace() != 1){                      // Verifica se a lista aberta está vazia e define algumas variaveis, tais como: eps(w) = 5,0, eps_satisfied = INFINITO, searchIterator = 0  é incrementado a cada pesquisa R* (e resetado após cada incremento de CallNumber)
+		SBPL_ERROR("ERROR: failed to create statespace\n"); 	// informa que essa é uma nova iteração, callnumber =0; é incrementado a cada chamada do R*, bReevaluatefvals = false; // need to reevaluate fvals, 
+	return;										                //e então reinicializa o estado de busca - breinitializeSearchStateSpace = true; // Reinicializa o espaço de busca
+	}									                        // ainda não define GOAL e START = NULL    
 }
 
 RSTARPlanner::~RSTARPlanner() // DESTRUTOR
