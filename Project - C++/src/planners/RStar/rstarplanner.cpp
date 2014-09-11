@@ -38,7 +38,7 @@ using namespace std;
 //-----------------------------------------------------------------------------------------------------
 
 // Construtor que inicializa algumas variaveis de controle e faz copia o conteudo das variaveis passada por parametro para manipulá-las durante a execução do programa.
-RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchForward){ // CONSTRUTOR
+RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchForward){ // CONSTRUTOR Chamado pelo MAIN
 
 	bforwardsearch = bSearchForward;	                      // Variavel passada por parametro pelo o método MAIN. Se TRUE a pesquisa será FORWARD, se falso BACKWARD. Esse valor é guardado na variavel "bforwardsearch"
 										                      // Para poder se manipulado livremente
@@ -98,37 +98,57 @@ RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchFo
      return;
     }
     
-    //set the start and goal states
-    if(InitializeSearchStateSpace() != 1){                      // Verifica se a lista aberta está vazia e define algumas variaveis, tais como: eps(w) = 5,0, eps_satisfied = INFINITO, searchIterator = 0  é incrementado a cada pesquisa R* (e resetado após cada incremento de CallNumber)
-		SBPL_ERROR("ERROR: failed to create statespace\n"); 	// informa que essa é uma nova iteração, callnumber =0; é incrementado a cada chamada do R*, bReevaluatefvals = false; // need to reevaluate fvals, 
-	return;										                //e então reinicializa o estado de busca - breinitializeSearchStateSpace = true; // Reinicializa o espaço de busca
+    //set the start and goal states								//Linha 1005
+    if(InitializeSearchStateSpace() != 1){                      // Verifica se a lista aberta está vazia caso não lança uma exceção. É definido algumas variaveis, tais como: eps(w) = 5,0, eps_satisfied = INFINITO, 
+																// searchIterator = 0  é incrementado a cada pesquisa R* (e resetado após cada incremento de CallNumber) informa que essa é uma nova iteração
+		SBPL_ERROR("ERROR: failed to create statespace\n"); 	// , callnumber =0; é incrementado a cada chamada do R*, bReevaluatefvals = false; // need to reevaluate fvals, Linha 983 
+	return;										                //e então reinicializa o estado de busca - breinitializeSearchStateSpace = true; // Reinicializa o espaço de busca - Linha 1080 - ReInitializeSearchStateSpace()
 	}									                        // ainda não define GOAL e START = NULL    
 }
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 RSTARPlanner::~RSTARPlanner() // DESTRUTOR
 {
   if(pSearchStateSpace != NULL){
     //delete the statespace
-    DeleteSearchStateSpace(); // deallocates memory used by SearchStateSpace
+    DeleteSearchStateSpace(); // Linha 1023 deallocates memory used by SearchStateSpace 
     delete pSearchStateSpace;
   }
   SBPL_FCLOSE(fDeb);
 }
 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void RSTARPlanner::Initialize_searchinfo(CMDPSTATE* state){
+// QUal a diferenca de CMDP e RState						// [Esse método é chamado na linha 183 pelo método CREATE STATE]
+															
+void RSTARPlanner::Initialize_searchinfo(CMDPSTATE* state){ // O método recebe um estado como parametro. O mesmo é formado por: StateID; vector<CMDPACTION*> Actions; vector<int> PredsID; void* PlannerSpecificData e é responsável em inicializar 
+															// algumas informações sobre o mesmo, para isso ele faz ...
 
-	RSTARState* searchstateinfo = (RSTARState*)state->PlannerSpecificData; // Ponteiro que armazena informações especificas do planejador [G, IteractionClosed, CallNumberAccessed, HeapIndex, BestPredAction]  Olhar no Debug o valor durante a execução ]
+	RSTARState* searchstateinfo = (RSTARState*)state->PlannerSpecificData; // Cria uma variavel que armazenara o conteudo do atributo PlannerSpecificData ( que pode ser ANAStar, RStar, ADStar ... Dependendo de quem o instancie)
 
 	searchstateinfo->MDPstate = state; // atualiza as informações sobre o proprio estado MDP recebidas por parametro
 	
-	InitializeSearchStateInfo(searchstateinfo); // Inicializa os atributos de controle do estado ( G, IteractionClosed, CallNumberAccessed, HeapIndex, BestPredAction ... )
+	InitializeSearchStateInfo(searchstateinfo); // Linha 514 -  Método responsável em inicializar alguns atributos de controle do estado, como G= INFINITO, IterationClosed = 0;
+												//CallNumberAcessed = pSearchStateSpace->callnumber; heapindex = 0; bestpredaction = NULL; Bem como calcula o valor da heuristica H, para isso ... 
+													//Se (searchgoalstate != NULL - Já exista o estado meta) 
+														//state->h = ComputeHeuristic(state->MDPstate); - Linha 480 
+															//Primeiro verifica se GoalState = NULL, se for retorna 0 (que signifca que a heuristica será recalculada de qualquer forma quando o estado objetivo for atualizado. 
+															//Depois é verificado se bforwardseach = true (FORWARD) 
+															//Se for forward, será criado uma variavel inteira para receber o resultado do metodo GetFromToHeuristic, e depois é invocado o método 
+																//GetFromToHeuristic(MDPstate->StateID, pSearchStateSpace->searchgoalstate->StateID);
+																//(int EnvironmentNAVXYTHETALAT::GetFromToHeuristic(int FromStateID, int ToStateID) - Linha 2836 (environment_navyxythetalat.cpp) É pego X e Y do estado e faz um calculo de distancia euclidiana)
+															//Se não for forward e sim backward, será executado:
+																//GetFromToHeuristic(pSearchStateSpace->searchgoalstate->StateID, MDPstate->StateID); 
+													//Se SearchGoalState == null - Não existir ainda estado objetivo)
+												// E por fim executa o método state->predactionV.clear(); limpando o conjunto de ações antecessores - linha 564
 }
 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-CMDPSTATE* RSTARPlanner::CreateState(int stateID)
-{	
-	CMDPSTATE* state = NULL; // Inicialmente o estado é criado como NULL
+CMDPSTATE* RSTARPlanner::CreateState(int stateID){				// [Esse método é chamado na linha 191 pelo método GetState]
+
+	CMDPSTATE* state = NULL; // Inicialmente o estado é criado como NULL, tal estado é composto de: int StateID; vector<CMDPACTION*> Actions; vector<int> PredsID; 	void* PlannerSpecificData;
 
 #if DEBUG
 	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND] != -1)
@@ -139,7 +159,7 @@ CMDPSTATE* RSTARPlanner::CreateState(int stateID)
 #endif
 
 	//adds to the tail a state
-	state = pSearchStateSpace->searchMDP.AddState(stateID); // Adciona um novo estado a calda do estado criado acima
+	state = pSearchStateSpace->searchMDP.AddState(stateID); // Aciona o ID do estado, recebido por paramentro no grafo de alto nível pertencente a pSearchStateSpace. (StateID = ID; PlannerSpecificData = NULL;)
 
 	//remember the index of the state
 	environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND] = pSearchStateSpace->searchMDP.StateArray.size()-1;
@@ -158,39 +178,38 @@ CMDPSTATE* RSTARPlanner::CreateState(int stateID)
 
 
 	//create search specific info
-	state->PlannerSpecificData = new RSTARState; // Cria um estado no R*, contendo todas informações.	
-	MaxMemoryCounter += sizeof(RSTARState);
-	Initialize_searchinfo(state);
+	state->PlannerSpecificData = new RSTARState; // Seta a variavel de informações especifica do planejador como RStarState.	
+	MaxMemoryCounter += sizeof(RSTARState); // IGNORA
+	Initialize_searchinfo(state); // Chama o método de inicializacao da informação de busca na linha 125
 
-	return state;
+	return state; // Após, retorna o estado.
 
 }
 
-CMDPSTATE* RSTARPlanner::GetState(int stateID)
-{	
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// [Esse método é chamado na linha 602, GetGVal; 654-ImprovePath; 1147-SetSearchGoalState; 1178 - SetSearchStartState; 1207-GetHeurValue; 1215- GetSearchPath]
+CMDPSTATE* RSTARPlanner::GetState(int stateID){	 // Método responsável em retornar o estado com base em seu ID, 
 
-	if(stateID >= (int)environment_->StateID2IndexMapping.size())
-	{
+	if(stateID >= (int)environment_->StateID2IndexMapping.size())	{  // Inicialmente é verificado se o indice passado está dentro dos limites de estados existentes. 
           SBPL_ERROR("ERROR int GetState: stateID %d is invalid\n", stateID);
 		throw new SBPL_Exception();
 	}
 
-	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND] == -1)
-		return CreateState(stateID);
+	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND] == -1) //O valor -1 significa que nenhum estado busca foi criado ainda para este hashentry e nesse caso será criado um estado com esse ID
+		return CreateState(stateID); //retorna o estado criado pelo método CreateState na linha 149
 	else
-		return pSearchStateSpace->searchMDP.StateArray[environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND]];
+		return pSearchStateSpace->searchMDP.StateArray[environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND]]; //Retorna o estado com o indice StateID
 
 }
 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-//-----------------------------------------------------------------------------------------------------
 
 
 //----------------------------------------functions related to local searches---------------------------------------------
-void RSTARPlanner::Initialize_rstarlsearchdata(CMDPSTATE* state)
-{
-	RSTARLSearchState* rstarlsearch_data = (RSTARLSearchState*)state->PlannerSpecificData;
+void RSTARPlanner::Initialize_rstarlsearchdata(CMDPSTATE* state){			// Método chamado na linha 228 pelo o outro metodo CreateLSearchState
+																			// Esse é responsável em iniciar as variaveis usadas em uma pesquisa local
+	RSTARLSearchState* rstarlsearch_data = (RSTARLSearchState*)state->PlannerSpecificData; // Passa as informaçoes do planejador para a variavel RStarLSearch_data
 
 	rstarlsearch_data->bestpredstate = NULL;
 	rstarlsearch_data->bestpredstateactioncost = 0;
@@ -202,13 +221,13 @@ void RSTARPlanner::Initialize_rstarlsearchdata(CMDPSTATE* state)
     rstarlsearch_data->listelem[1] = NULL;
     
     //pointer to itself
-    rstarlsearch_data->MDPstate = state;
-
+    rstarlsearch_data->MDPstate = state; //Seta o grafo MDP do estado com o estado passado por parametro
 }
 
-CMDPSTATE* RSTARPlanner::CreateLSearchState(int stateID)
-{	
-	CMDPSTATE* state = NULL;
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CMDPSTATE* RSTARPlanner::CreateLSearchState(int stateID){            //Esse método é chamado pelo método GetLSearchState (linha 262)
+																	 // O mesmo é responsável em criar uma pesquisa local
+	CMDPSTATE* state = NULL;										 // Inicialmente cria um estado nulo.
 
 #if DEBUG
 	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] != -1)
@@ -219,7 +238,7 @@ CMDPSTATE* RSTARPlanner::CreateLSearchState(int stateID)
 #endif
 
 	//adds to the tail a state
-	state = pLSearchStateSpace->MDP.AddState(stateID);
+	state = pLSearchStateSpace->MDP.AddState(stateID); // Adciona o iD do estado ao grafo MDP e esse a variavel State
 
 	//remember the index of the state
 	environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] = pLSearchStateSpace->MDP.StateArray.size()-1;
@@ -233,55 +252,55 @@ CMDPSTATE* RSTARPlanner::CreateLSearchState(int stateID)
 #endif
 
 	//create and initialize rstarlsearch_data
-	state->PlannerSpecificData = new RSTARLSearchState;
-	Initialize_rstarlsearchdata(state);
+	state->PlannerSpecificData = new RSTARLSearchState; //Cria  um estado de busca local com os seguintes atributos: MDP; StartState; GoalState; iteration; OPEN; (incons list - used for suboptimal search) INCONS;
+	Initialize_rstarlsearchdata(state); // Inicializa o estado local, Linha 210
 
-	return state;
+	return state; //Após a inicialização das informações retorna o estado
 
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CMDPSTATE* RSTARPlanner::GetLSearchState(int stateID){	// método muito parecido com o GetState  da linha 191. Este método responsável em retornar o estado local com base em seu ID 
+														// [Esse método é chamado na linha 295 pelo método ComputeLocalPath]
 
-CMDPSTATE* RSTARPlanner::GetLSearchState(int stateID)
-{	
+	if(stateID >= (int)environment_->StateID2IndexMapping.size())	{ // Inicialmente é verificado se o indice passado está dentro dos limites de estados existentes. 
 
-	if(stateID >= (int)environment_->StateID2IndexMapping.size())
-	{
 		SBPL_ERROR("ERROR int GetLSearchState: stateID is invalid\n");
 		throw new SBPL_Exception();
 	}
 
-	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] == -1)
+	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] == -1) // Logo em seguida é verificado se há algum estado de busca criado (O valor -1 significa que nenhum estado busca foi criado ainda para este hashentry e nesse caso será criado um estado com esse ID)
 		return CreateLSearchState(stateID);
 	else
-		return pLSearchStateSpace->MDP.StateArray[environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND]];
+		return pLSearchStateSpace->MDP.StateArray[environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND]]; // Em seguida é retornado o estado local
 
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CKey RSTARPlanner::LocalSearchComputeKey(RSTARLSearchState* rstarlsearchState){ // [Esse método é chamado na linha 295 pelo método ComputeLocalPath]
 
-CKey RSTARPlanner::LocalSearchComputeKey(RSTARLSearchState* rstarlsearchState)
-{
-    CKey retkey;
+    CKey retkey; // Fazendo papel de F, F = G + H
 
 	int h;
-	if(bforwardsearch)
-		h = environment_->GetFromToHeuristic(rstarlsearchState->MDPstate->StateID, pLSearchStateSpace->GoalState->StateID); // Calcula o F(s)
+	if(bforwardsearch) // Se a pesquisa for forward
+		h = environment_->GetFromToHeuristic(rstarlsearchState->MDPstate->StateID, pLSearchStateSpace->GoalState->StateID); // Envia o ID da posição atual e da posição objetivo e então é calculado o H chamando o método GetFromHeuristic. Linha 2836(environment_navXYTHETALAT.cpp)
 	else
-		h = environment_->GetFromToHeuristic(pLSearchStateSpace->GoalState->StateID, rstarlsearchState->MDPstate->StateID);
+		h = environment_->GetFromToHeuristic(pLSearchStateSpace->GoalState->StateID, rstarlsearchState->MDPstate->StateID); // Envia o ID da posição objetivo e da posição atual e então é calculado o H.
 
-    retkey.key[0] = rstarlsearchState->g + (int)(pSearchStateSpace->eps*h);
-	//retkey.key[0] = (int)(pSearchStateSpace->eps*h); // linha 600
+	retkey.key[0] = rstarlsearchState->g + (int)(pSearchStateSpace->eps * h); //Então é calculado o F = G+eps(w) *h
 
-    return retkey;
+    return retkey; 
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+											// Método chamado na linha 756 pelo método ImprovePath
+bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, int *pCost, int *pCostLow, int *pExp, vector<int>* pPathIDs, int* pNewGoalStateID, double maxnumofsecs){
+//ComputeLocalPath(rstarpredstate->MDPstate->StateID, rstarstate->MDPstate->StateID, maxc, maxe,&computedaction->Costs[0], &computedactiondata->clow, &computedactiondata->exp, &computedactiondata->pathIDs, &NewGoalStateID, MaxNumofSecs);
 
-bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, 
-									int *pCost, int *pCostLow, int *pExp, vector<int>* pPathIDs, int* pNewGoalStateID, double maxnumofsecs)
-{
-    vector<int> SuccIDV;
+    vector<int> SuccIDV; // Conjunto de K sucessores escolhidos randomicamente
     vector<int> CostV;              
 
-    if(pLSearchStateSpace->OPEN == NULL)
+    if(pLSearchStateSpace->OPEN == NULL) // Verifica se a lista aberta e a lista de Incons não foi criada, se isso for verdade ele cria
         pLSearchStateSpace->OPEN = new CHeap;
-    if(pLSearchStateSpace->INCONS == NULL)
+    if(pLSearchStateSpace->INCONS == NULL) // Cria aqui a INCONSLIST, mas não utiliza e não preenche
         pLSearchStateSpace->INCONS = new CList;
 
     int local_expands = 0;
@@ -294,12 +313,12 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
     pLSearchStateSpace->StartState = GetLSearchState(StartStateID);
     pLSearchStateSpace->GoalState = GetLSearchState(GoalStateID);
 
-    RSTARLSearchState* rstarlsearchstate = (RSTARLSearchState*)pLSearchStateSpace->StartState->PlannerSpecificData;
+    RSTARLSearchState* rstarlsearchstate = (RSTARLSearchState*)pLSearchStateSpace->StartState->PlannerSpecificData; 
     RSTARLSearchState* rstarlsearchgoalstate = (RSTARLSearchState*)pLSearchStateSpace->GoalState->PlannerSpecificData;
 
     //OPEN=0 (it shouldn't be necessary since the memory is cleared before each search)
-    pLSearchStateSpace->OPEN->makeemptyheap();
-    pLSearchStateSpace->INCONS->makeemptylist(RSTAR_INCONS_LIST_ID);
+    pLSearchStateSpace->OPEN->makeemptyheap(); // Limpara as listas a cada iteracao
+    pLSearchStateSpace->INCONS->makeemptylist(RSTAR_INCONS_LIST_ID); // Esvazia a lista de incons
 
     //CLOSED = 0 because iteration is increased
     
@@ -307,14 +326,14 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
     rstarlsearchstate->g = 0;
 
     //insert start into open
-    pLSearchStateSpace->OPEN->insertheap(rstarlsearchstate, LocalSearchComputeKey(rstarlsearchstate));
+    pLSearchStateSpace->OPEN->insertheap(rstarlsearchstate, LocalSearchComputeKey(rstarlsearchstate)); // Insere start na lista aberta
 
     //TODO - prove that min_{OPEN and INCONS} (g + eps*h) <= eps*c*. (proof: take min_{OPEN and INCONS} (g+h) <= c* and
     //multiply both sides by eps and then bring eps into min and drop one by g. I still need to implement INCONS and minimum tracker for it - then change 
     //the minkey to min over two sets
     while(rstarlsearchgoalstate->g > pLSearchStateSpace->OPEN->getminkeyheap().key[0]  && local_expands < maxe &&
-        pLSearchStateSpace->OPEN->getminkeyheap().key[0] <= maxc)
-    {
+        pLSearchStateSpace->OPEN->getminkeyheap().key[0] <= maxc)    {
+
         //pop the min element
         rstarlsearchstate = (RSTARLSearchState*)pLSearchStateSpace->OPEN->deleteminheap();
         
@@ -335,8 +354,8 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
 	        environment_->GetSuccs(rstarlsearchstate->MDPstate->StateID, &SuccIDV, &CostV); 
 
         //iterate over states in SUCCS set
-		for(int i = 0; i < (int)SuccIDV.size(); i++)
-        {
+		for(int i = 0; i < (int)SuccIDV.size(); i++) {
+
             RSTARLSearchState* rstarlsearchSuccState = (RSTARLSearchState*)GetLSearchState(SuccIDV.at(i))->PlannerSpecificData;
             
             //skip if the state is already closed - TODO fix this with INCONS list - it seems to make five times less expansions!
@@ -344,8 +363,8 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
             //continue;
         
             //see if we can improve g-value of successor
-            if(rstarlsearchstate->g + CostV[i] < rstarlsearchSuccState->g)
-            {
+            if(rstarlsearchstate->g + CostV[i] < rstarlsearchSuccState->g) {
+
                 rstarlsearchSuccState->bestpredstate = rstarlsearchstate->MDPstate;
                 rstarlsearchSuccState->bestpredstateactioncost = CostV[i]; 
                 rstarlsearchSuccState->g = rstarlsearchstate->g + CostV[i];
@@ -355,8 +374,8 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
                     pLSearchStateSpace->OPEN->updateheap(rstarlsearchSuccState, LocalSearchComputeKey(rstarlsearchSuccState));
 
 
-                if(environment_->AreEquivalent(rstarlsearchSuccState->MDPstate->StateID, rstarlsearchgoalstate->MDPstate->StateID) == true && rstarlsearchSuccState->g < rstarlsearchgoalstate->g) 
-                {
+                if(environment_->AreEquivalent(rstarlsearchSuccState->MDPstate->StateID, rstarlsearchgoalstate->MDPstate->StateID) == true && rstarlsearchSuccState->g < rstarlsearchgoalstate->g) {
+
                     //swap the goal
                     rstarlsearchgoalstate = rstarlsearchSuccState;
                     GoalStateID = rstarlsearchgoalstate->MDPstate->StateID;
@@ -364,8 +383,8 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
             }
         }
 
-		if(local_expands%10000 == 0)
-		{
+		if(local_expands%10000 == 0){
+
 			if((clock()-TimeStarted) >= maxnumofsecs*(double)CLOCKS_PER_SEC) 
 			{
 				SBPL_PRINTF("breaking local search because global planning time expires\n");
@@ -382,22 +401,22 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
     //set the return path and other path related variables
     vector<int> tempPathID;
     pPathIDs->clear();
-    if(rstarlsearchgoalstate->g < INFINITECOST)
-    {
+    if(rstarlsearchgoalstate->g < INFINITECOST)    {
+
         int pathcost = 0;
 
         //path exists
         rstarlsearchstate = rstarlsearchgoalstate;
-        while(rstarlsearchstate->bestpredstate != NULL && rstarlsearchstate->MDPstate != pLSearchStateSpace->StartState)
-        {
+        while(rstarlsearchstate->bestpredstate != NULL && rstarlsearchstate->MDPstate != pLSearchStateSpace->StartState)        {
+
             tempPathID.push_back(rstarlsearchstate->MDPstate->StateID);
             pathcost += rstarlsearchstate->bestpredstateactioncost;
             rstarlsearchstate = (RSTARLSearchState*)rstarlsearchstate->bestpredstate->PlannerSpecificData;
         }
         //store into pPathIDs so that the path is always forward path w.r.t. the original graph 
 		//this requires us to reverse order in case of forward search
-        for(int i = 0; i < (int)tempPathID.size(); i++)
-        {
+        for(int i = 0; i < (int)tempPathID.size(); i++)        {
+
 			if(bforwardsearch == false)
 				pPathIDs->push_back(tempPathID.at(i));
 			else
@@ -424,20 +443,20 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
     return true;
 
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool RSTARPlanner::DestroyLocalSearchMemory(){ //Esse método é chamado na linha 654 pelo método improvePath
 
-bool RSTARPlanner::DestroyLocalSearchMemory()
-{
-    pLSearchStateSpace->OPEN->currentsize = 0;
-    pLSearchStateSpace->StartState = pLSearchStateSpace->GoalState = NULL;
+    pLSearchStateSpace->OPEN->currentsize = 0; // Seta o tamanho da lista aberta para 0
+    pLSearchStateSpace->StartState = pLSearchStateSpace->GoalState = NULL; // Coloca O ponto inicial e o objetivo como nulo.
 
     //remove the states in the MDP itself
-    for(int i = 0; i < (int)pLSearchStateSpace->MDP.StateArray.size(); i++)
-    {
-        CMDPSTATE* state = pLSearchStateSpace->MDP.StateArray.at(i);
-        RSTARLSearchState* rstarlsearchstatedata = (RSTARLSearchState*)state->PlannerSpecificData;    
-        delete rstarlsearchstatedata;
-        state->PlannerSpecificData = NULL;
-        environment_->StateID2IndexMapping[state->StateID][RSTARMDP_LSEARCH_STATEID2IND] = -1;
+    for(int i = 0; i < (int)pLSearchStateSpace->MDP.StateArray.size(); i++)    { // varra todo o Grafo MDP
+
+        CMDPSTATE* state = pLSearchStateSpace->MDP.StateArray.at(i); // guarda o elemento da vez na variavel state
+        RSTARLSearchState* rstarlsearchstatedata = (RSTARLSearchState*)state->PlannerSpecificData;    //Armazena o tipo de busca da variavel state na variavel RstarL ...
+        delete rstarlsearchstatedata; // Apaga
+        state->PlannerSpecificData = NULL; // Seta o tipo como nulo
+        environment_->StateID2IndexMapping[state->StateID][RSTARMDP_LSEARCH_STATEID2IND] = -1; // seta como -1 que indica que ainda nao tem elementos
     }
     //now we can delete the states themselves
     if(pLSearchStateSpace->MDP.Delete() == false)
@@ -448,30 +467,30 @@ bool RSTARPlanner::DestroyLocalSearchMemory()
 
     //TODO - ask Env to delete the new memory allocated during the local search (usings the fact that stateID's for local search continuously and no states were
     //allocated for global search before local search exits.
-
+	//pedir para apagar a nova memória alocada durante a busca local (usando o fato de que o estado de de busca local de forma contínua e sem estados foram // alocada para pesquisa global antes de saídas de pesquisa local.
 	return true;
 }
 
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
 
 
+// Método chamado na linha 514 pelo método InitializeSearchStateInfo, bem como na linha 539 pelo método ReinitializeSearchStateInfo e por fim, na linha 1147 pelo método SetSeachGoalState
+int RSTARPlanner::ComputeHeuristic(CMDPSTATE* MDPstate){
 
-int RSTARPlanner::ComputeHeuristic(CMDPSTATE* MDPstate)
-{
 	//compute heuristic for search
 
-	if(pSearchStateSpace->searchgoalstate == NULL)
+	if(pSearchStateSpace->searchgoalstate == NULL) // Se ainda não for definido o ponto objetivo, retorne 0
 		return 0; //the heuristics will be re-computed anyway when searchgoalstate is updated
 
-	if(bforwardsearch)
+	if(bforwardsearch) // Se a direção de busca for forward
 	{
 
 #if MEM_CHECK == 1
 		//int WasEn = DisableMemCheck();
 #endif
-
+		// Bem parecido com o método LocalSearchComputeKey - Linha 278
 		//forward search: heur = distance from state to searchgoal which is Goal RSTARState
 		int retv =  environment_->GetFromToHeuristic(MDPstate->StateID, pSearchStateSpace->searchgoalstate->StateID);
 
@@ -489,20 +508,20 @@ int RSTARPlanner::ComputeHeuristic(CMDPSTATE* MDPstate)
 		return environment_->GetFromToHeuristic(pSearchStateSpace->searchgoalstate->StateID, MDPstate->StateID);
 	}
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-//initialization of a state
+//Esse método é chamado na linha 132 pelo metodo Initialize_searchinfo
 void RSTARPlanner::InitializeSearchStateInfo(RSTARState* state)
 {
 	state->g = INFINITECOST;
-	state->iterationclosed = 0;
-	state->callnumberaccessed = pSearchStateSpace->callnumber; //CallNumber é incrementado a cada chamada do R* 
+	state->iterationclosed = 0;                                //searchiteration é incrementado a cada pesquisa do R* (e reinicia após cada incremento de CallNumber)
+	state->callnumberaccessed = pSearchStateSpace->callnumber; //CallNumber é incrementado a cada chamada ao R* (sim, ele pode ser chamado varias vezes dentro do planejador desde que que o R* seja executado várias vezes )
 	state->heapindex = 0;
 	state->bestpredaction = NULL;
 
 	//compute heuristics
 #if USE_HEUR
-	if(pSearchStateSpace->searchgoalstate != NULL)
+	if(pSearchStateSpace->searchgoalstate != NULL) // Se já existir ponto destino chame computeHeuristic (Linha 480), caso não diga que a heuristica é apenas 0
 		state->h = ComputeHeuristic(state->MDPstate); 
 	else 
 		state->h = 0;
@@ -510,17 +529,17 @@ void RSTARPlanner::InitializeSearchStateInfo(RSTARState* state)
 	state->h = 0;
 #endif
 
-	state->predactionV.clear();
+	state->predactionV.clear(); // Conjunto dos caminhos preantecedidos e outras informaçôes são limpas
 
 }
 
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+//re-initialization of a state    [ Esse método é chamado na linha 654 pelo método ImprovePath e em séguida pelo método ReinitializeSearchStateSpace, na linha 1078 ]
+void RSTARPlanner::ReInitializeSearchStateInfo(RSTARState* state){
 
-//re-initialization of a state
-void RSTARPlanner::ReInitializeSearchStateInfo(RSTARState* state)
-{
 	state->g = INFINITECOST;
-	state->iterationclosed = 0;
+	state->iterationclosed = 0; // tem o comportamente muito parecido com o método InitializeSearchStateInfo 514, modificando apenas a partir da linha 565
 	state->callnumberaccessed = pSearchStateSpace->callnumber;
 	state->heapindex = 0;
 
@@ -541,99 +560,99 @@ void RSTARPlanner::ReInitializeSearchStateInfo(RSTARState* state)
 	state->h = 0;
 
 #endif
-
+	//deleta o PlannerSpecificData para cada caminho (ação)
 	state->predactionV.clear();
 	for(int i = 0; i < (int)state->MDPstate->Actions.size(); i++){
-		if(state->MDPstate->Actions.at(i)->PlannerSpecificData != NULL){
-			DeleteSearchActionData((RSTARACTIONDATA*)state->MDPstate->Actions.at(i)->PlannerSpecificData);
-			delete (RSTARACTIONDATA*)(state->MDPstate->Actions.at(i)->PlannerSpecificData);
-			state->MDPstate->Actions.at(i)->PlannerSpecificData = NULL;
+		if(state->MDPstate->Actions.at(i)->PlannerSpecificData != NULL){ // Varre todo o grafo MDP escolhendo os estados com Informações do planejador já setadas
+			DeleteSearchActionData((RSTARACTIONDATA*)state->MDPstate->Actions.at(i)->PlannerSpecificData); //´método sem nenhuma implementacao na linha 594
+			delete (RSTARACTIONDATA*)(state->MDPstate->Actions.at(i)->PlannerSpecificData); // Deleta a informação do planejador 
+			state->MDPstate->Actions.at(i)->PlannerSpecificData = NULL; // seta a mesma para nula
 		}
-	}
-	state->MDPstate->RemoveAllActions();
+	} //Necessário deletar os caminhos predecessores
+	state->MDPstate->RemoveAllActions(); // deleta o array de caminhos. 
 	
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+																		//Método chamado na linha 1021 pelo método DeleteSearchStateSpace
+void RSTARPlanner::DeleteSearchStateData(RSTARState* state){
 
-
-void RSTARPlanner::DeleteSearchStateData(RSTARState* state)
-{
 	//delete PlannerSpecificData for each action
 	state->predactionV.clear();
 	for(int i = 0; i < (int)state->MDPstate->Actions.size(); i++){
-		if(state->MDPstate->Actions.at(i)->PlannerSpecificData != NULL){
-			DeleteSearchActionData((RSTARACTIONDATA*)state->MDPstate->Actions.at(i)->PlannerSpecificData);
-			delete (RSTARACTIONDATA*)state->MDPstate->Actions.at(i)->PlannerSpecificData;
-			state->MDPstate->Actions.at(i)->PlannerSpecificData = NULL;
+		if(state->MDPstate->Actions.at(i)->PlannerSpecificData != NULL){ // Varre todo o grafo MDP escolhendo os estados com Informações do planejador já setadas
+			DeleteSearchActionData((RSTARACTIONDATA*)state->MDPstate->Actions.at(i)->PlannerSpecificData);//´método sem nenhuma implementacao na linha 594
+			delete (RSTARACTIONDATA*)state->MDPstate->Actions.at(i)->PlannerSpecificData; // Deleta a informação do planejador 
+			state->MDPstate->Actions.at(i)->PlannerSpecificData = NULL; // seta a mesma para nula
 		}
 	}
-	state->MDPstate->RemoveAllActions();
+	state->MDPstate->RemoveAllActions(); // Deleta o array de caminhos ( Linha 209 mdp.cpp )
 	
 	return;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void RSTARPlanner::DeleteSearchActionData(RSTARACTIONDATA* actiondata)
 {
 	//no memory was allocated for actiondata
 
 	return;
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+int RSTARPlanner::GetGVal(int StateID){ // Não encontrei quem chama esse método
 
-int RSTARPlanner::GetGVal(int StateID)
-{
-	 CMDPSTATE* cmdp_state = GetState(StateID);
-	 RSTARState* state = (RSTARState*)cmdp_state->PlannerSpecificData;
-	 return state->g;
+	 CMDPSTATE* cmdp_state = GetState(StateID); // é pego o estado com o id passado por paramentro e armazenado na variavel local 
+	 RSTARState* state = (RSTARState*)cmdp_state->PlannerSpecificData; //Em seguida é armazenado em outra variavel temporaria o resultado do PlannerSpecificData
+	 return state->g; //É retornado o G armazenado na variavel estado
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-void  RSTARPlanner::SetBestPredecessor(RSTARState* rstarState, RSTARState* rstarPredState, CMDPACTION* action)
-{
+void  RSTARPlanner::SetBestPredecessor(RSTARState* rstarState, RSTARState* rstarPredState, CMDPACTION* action){ // método responsavel em setar o melhor caminho antecessor
+																												// [Método chamado na linha 654 pelo método ImprovePath]
     rstarState->bestpredaction = action;
-    rstarState->g = rstarPredState->g + ((RSTARACTIONDATA*)(action->PlannerSpecificData))->clow;
-    if(rstarState->heapindex == 0)
+    rstarState->g = rstarPredState->g + ((RSTARACTIONDATA*)(action->PlannerSpecificData))->clow; // Atualizar o G ( G do predecessor mais o G atual )
+    if(rstarState->heapindex == 0) // Se o index da pilha for igual a 0, não tem nada incluso, se nao for (tem algo) atualize a heap
         pSearchStateSpace->OPEN->insertheap(rstarState, ComputeKey(rstarState));
     else
         pSearchStateSpace->OPEN->updateheap(rstarState, ComputeKey(rstarState));
 
 }
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CKey RSTARPlanner::ComputeKey(RSTARState* rstarState){ // [Método chamado na linha 610 pelo método SetBestPredecessor; Bem como na linha 654 pelo método ImprovePath; também na linha 981 pelo método Reevaluete e por fim na linha 1078 pelo método ReInitializeSearchStateSpace
 
-CKey RSTARPlanner::ComputeKey(RSTARState* rstarState)
-{
     CKey retkey;
 
-	int h, starttostateh;
-	if(bforwardsearch)
+	int h, starttostateh; // São criadas duas variaveis locais
+	if(bforwardsearch) // Se for FORWARD
 	{
-		h = environment_->GetFromToHeuristic(rstarState->MDPstate->StateID, pSearchStateSpace->searchgoalstate->StateID);
-		starttostateh = environment_->GetFromToHeuristic(pSearchStateSpace->searchstartstate->StateID, rstarState->MDPstate->StateID);
-	}
+		h = environment_->GetFromToHeuristic(rstarState->MDPstate->StateID, pSearchStateSpace->searchgoalstate->StateID); // É calculado o H considerando a distancia Euclidiana do ponto atual até a meta e armazenado na variavel h
+		starttostateh = environment_->GetFromToHeuristic(pSearchStateSpace->searchstartstate->StateID, rstarState->MDPstate->StateID); // Depois é calculado o H considerando a distancia Euclidiana do ponto inicial até o ponto atual e armazenado na variavel startTostateH
 	else
 	{
-		h = environment_->GetFromToHeuristic(pSearchStateSpace->searchgoalstate->StateID, rstarState->MDPstate->StateID);
-		starttostateh = environment_->GetFromToHeuristic(rstarState->MDPstate->StateID, pSearchStateSpace->searchstartstate->StateID);
+		h = environment_->GetFromToHeuristic(pSearchStateSpace->searchgoalstate->StateID, rstarState->MDPstate->StateID); // É calculado o H considerando a distancia Euclidiana do ponto objetivo até o ponto atual e armazenado na variavel h
+		starttostateh = environment_->GetFromToHeuristic(rstarState->MDPstate->StateID, pSearchStateSpace->searchstartstate->StateID); // Depois é calculado o H considerando a distancia Euclidiana do ponto atual até o ponto inicial e armazenado na variavel startTostateH
 	}
 
-	//compute 2nd element of the key
-   // retkey.key[1] = rstarState->g + (int)(pSearchStateSpace->eps*h);
-	retkey.key[1] =  (int)(pSearchStateSpace->eps*h);
+	//compute 2nd element of the key   
+    retkey.key[1] = rstarState->g + (int)(pSearchStateSpace->eps*h); // Pode-se considerar retkey.key[x] = as prioridade de K. // k[1, g(s) + w h(start, s) = AVOID
+	//retkey.key[1] =  (int)(pSearchStateSpace->eps*h);
 	
 	//compute the 1st element
-    if(rstarState->g > pSearchStateSpace->eps*starttostateh || 
-        (rstarState->bestpredaction != NULL && ((RSTARACTIONDATA*)rstarState->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0 &&
-         ((RSTARACTIONDATA*)rstarState->bestpredaction->PlannerSpecificData)->exp >= RSTAR_EXPTHRESH))
+    if(rstarState->g > pSearchStateSpace->eps*starttostateh || // Se G(s) > w h(start,s) (1ª condição para evitar um estado)
+        (rstarState->bestpredaction != NULL && // No artigo vinha dizendo que era para ser =Null e não diferente
+		((RSTARACTIONDATA*)rstarState->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0 &&
+         ((RSTARACTIONDATA*)rstarState->bestpredaction->PlannerSpecificData)->exp >= RSTAR_EXPTHRESH)) // Se expandir mais que 150 deve ser marcado como EVITAR
         retkey.key[0] = 1; 
     else
         retkey.key[0] = 0;
    
 	return retkey;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //returns 1 if the solution is found, 0 if the solution does not exist and 2 if it ran out of time
-int RSTARPlanner::ImprovePath(double MaxNumofSecs)
-{
+int RSTARPlanner::ImprovePath(double MaxNumofSecs){
+
 	int expands;
 	RSTARState *rstarstate, *searchgoalstate, *searchstartstate;
 	CKey key, minkey;
@@ -645,41 +664,41 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 
 	expands = 0;
 
-	if(pSearchStateSpace->searchgoalstate == NULL)
+	if(pSearchStateSpace->searchgoalstate == NULL) // Se ainda não foi setado um objetivo, lance uma exceção
 	{
 		SBPL_ERROR("ERROR searching: no goal state is set\n");
 		throw new SBPL_Exception();
 	}
 
 	//goal state
-	searchgoalstate = (RSTARState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData);
-	if(searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber)
-		ReInitializeSearchStateInfo(searchgoalstate);
+	searchgoalstate = (RSTARState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData); //Caso já tenha setado o objetivo, armazene essa informação na variavel SearchGoalState
+	if(searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber) // Se numero de chamadas de acesso no estado objetivo for diferente do numero de chamadas, reinicialize as informações de busca para a partir daqui já está tudo ok
+		ReInitializeSearchStateInfo(searchgoalstate); // Linha 539
 
 	//get the start state
-	searchstartstate = (RSTARState*)(pSearchStateSpace->searchstartstate->PlannerSpecificData);
+	searchstartstate = (RSTARState*)(pSearchStateSpace->searchstartstate->PlannerSpecificData); // Sete as informações do estado inicial e armazene essa informação na variavel SearchStartState
 
 	//set goal key
     if(searchgoalstate != searchstartstate){
-        goalkey.key[0] = 1;
+        goalkey.key[0] = 1;                     // Se não chegou no ponto objetivo
         goalkey.key[1] = INFINITECOST;
     }
     else{
-        goalkey = ComputeKey(searchstartstate);
-    }
+		goalkey = ComputeKey(searchstartstate);  //Se Goal = Start (calcule a Key) 621 - [ Está referenciando errado ao ADPlanner - 166 adplanner.cpp]
+    }			  
 
 
 	//expand states until done
-	minkey = pSearchStateSpace->OPEN->getminkeyheap();
+	minkey = pSearchStateSpace->OPEN->getminkeyheap(); // Pega o primeiro estado do Heap e retorna (linha 305 - heap.cpp)
 	while(!pSearchStateSpace->OPEN->emptyheap() &&
-		(clock()-TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC) 
-    {
+		(clock()-TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC) { // Enquanto a lista aberta nao estiver vazia e o tempo de execução do algoritmo não ultrapassar o limite de 1000 segundos Continue. Obs timeStarted() é instanciado na linha 1331
+
       
       //recompute minkey
       minkey = pSearchStateSpace->OPEN->getminkeyheap();
       
       //recompute goalkey if necessary
-      goalkey = ComputeKey(searchgoalstate);
+      goalkey = ComputeKey(searchgoalstate); // Retornará 1 se for para evitar o estado ou 0 para consideradr
       
       if(goalkey < minkey)
         break; //termination condition
@@ -956,80 +975,80 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 	return retv;		
 }
 
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //note this does NOT re-compute heuristics, only re-orders OPEN list based on current eps and h-vals
-void RSTARPlanner::Reevaluatefvals()
-{
+void RSTARPlanner::Reevaluatefvals(){
+	// Método responsável em reordenar a lista aberta considerando  os valores de E e H
 	CKey key;
 	int i;
-	CHeap* pheap = pSearchStateSpace->OPEN;
+	CHeap* pheap = pSearchStateSpace->OPEN; // Copia a lista aberta para a variavel pheap
 	
 	//re-compute priorities for states in OPEN and reorder it
-	for (i = 1; i <= pheap->currentsize; ++i)
+	for (i = 1; i <= pheap->currentsize; ++i) // Recalcula as prioridades dos estados em ABERTO e reordena os mesmos
 	  {
-		RSTARState* state = (RSTARState*)pheap->heap[i].heapstate;
-		pheap->heap[i].key = ComputeKey(state); 
+		RSTARState* state = (RSTARState*)pheap->heap[i].heapstate; // Pegue todos os estados da lista aberta
+		pheap->heap[i].key = ComputeKey(state); // Calcule a Key do estado atual
 	  }
-	pheap->makeheap();
+	pheap->makeheap(); // Após calcular todos os estados executar o método Makeheap
 
-	pSearchStateSpace->bReevaluatefvals = false;
+	pSearchStateSpace->bReevaluatefvals = false; // Volta a variavel bReevalueatefvals para false
 }
 
 
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //creates (allocates memory) search state space
 //does not initialize search statespace
-int RSTARPlanner::CreateSearchStateSpace() 
-{
+int RSTARPlanner::CreateSearchStateSpace() {
+
 
 	//create a heap
-	pSearchStateSpace->OPEN = new CHeap;
-	MaxMemoryCounter += sizeof(CHeap);
+	pSearchStateSpace->OPEN = new CHeap; // Cria a lista aberta
+	MaxMemoryCounter += sizeof(CHeap); // Atualiza a mémoria
 	//pSearchStateSpace->inconslist = new CList;
 	//MaxMemoryCounter += sizeof(CList);
 
-	pSearchStateSpace->searchgoalstate = NULL;
-	pSearchStateSpace->searchstartstate = NULL;
+	pSearchStateSpace->searchgoalstate = NULL; // Defini GOAL como nulo momentaneamente
+	pSearchStateSpace->searchstartstate = NULL; // Defini START como nulo memomentaneamente
 
-    pSearchStateSpace->bReinitializeSearchStateSpace = false;
+    pSearchStateSpace->bReinitializeSearchStateSpace = false; //Seta a variavel  como false informando que não reinicializará  a busca agora 
 	
 	return 1;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //deallocates memory used by SearchStateSpace
-void RSTARPlanner::DeleteSearchStateSpace()
-{
-	if(pSearchStateSpace->OPEN != NULL)
+void RSTARPlanner::DeleteSearchStateSpace() {
+
+	if(pSearchStateSpace->OPEN != NULL) // Se existir lista ABERTA
 	{
-		pSearchStateSpace->OPEN->makeemptyheap();
-		delete pSearchStateSpace->OPEN;
-		pSearchStateSpace->OPEN = NULL;
+		pSearchStateSpace->OPEN->makeemptyheap(); //Limpe a lista
+		delete pSearchStateSpace->OPEN; // Delete
+		pSearchStateSpace->OPEN = NULL; // E coloque a mesma para nula
 	}
 
 	//if(pSearchStateSpace->inconslist != NULL)
 	//{
-	//	pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID);
+	//	pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID); // Ignore as listas Incons
 	//	delete pSearchStateSpace->inconslist;
 	//	pSearchStateSpace->inconslist = NULL;
 	//}
 
-	//delete the states themselves
-	int iend = (int)pSearchStateSpace->searchMDP.StateArray.size();
+	//delete the states themselves [ Exclui os próprios estados ]
+	int iend = (int)pSearchStateSpace->searchMDP.StateArray.size(); // Pega o tamanho da lista MDP
 	for(int i=0; i < iend; i++)
 	{
 		CMDPSTATE* state = pSearchStateSpace->searchMDP.StateArray[i];
-		if(state != NULL && state->PlannerSpecificData != NULL){
-			DeleteSearchStateData((RSTARState*)state->PlannerSpecificData);
-			delete (RSTARState*)state->PlannerSpecificData;
-			state->PlannerSpecificData = NULL;
+		if(state != NULL && state->PlannerSpecificData != NULL){ // Se o estado da vez não for nulo e já tiver PlannerSpecificData
+			DeleteSearchStateData((RSTARState*)state->PlannerSpecificData); // Método sem implementação na linha 594
+			delete (RSTARState*)state->PlannerSpecificData; // Delete o planner
+			state->PlannerSpecificData = NULL; // Coloque o planner para nulo
 		}
-		if(state != NULL)
+		if(state != NULL) // Se apenas existir o estado e não estiver setado o planner
 		{
 			for(int aind = 0; aind < (int)state->Actions.size(); aind++)
 			{
-				if(state->Actions[aind]->PlannerSpecificData != NULL)
+				if(state->Actions[aind]->PlannerSpecificData != NULL) // Revisar essa outra parte (Action,Planner ... )
 				{
 					DeleteSearchActionData((RSTARACTIONDATA*)state->Actions[aind]->PlannerSpecificData);
 					delete (RSTARACTIONDATA*)state->Actions[aind]->PlannerSpecificData;
@@ -1041,7 +1060,7 @@ void RSTARPlanner::DeleteSearchStateSpace()
 
 	pSearchStateSpace->searchMDP.Delete();
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 //reset properly search state space
@@ -1053,7 +1072,7 @@ int RSTARPlanner::ResetSearchStateSpace()
 
 	return 1;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //initialization before each search
 void RSTARPlanner::ReInitializeSearchStateSpace()
@@ -1092,7 +1111,7 @@ void RSTARPlanner::ReInitializeSearchStateSpace()
 	pSearchStateSpace->bReevaluatefvals = false;
 }
 
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //very first initialization
 int RSTARPlanner::InitializeSearchStateSpace()
 {
@@ -1123,7 +1142,7 @@ int RSTARPlanner::InitializeSearchStateSpace()
 	return 1;
 
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int RSTARPlanner::SetSearchGoalState(int SearchGoalStateID)
 {
@@ -1154,7 +1173,7 @@ int RSTARPlanner::SetSearchGoalState(int SearchGoalStateID)
 	return 1;
 
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int RSTARPlanner::SetSearchStartState(int SearchStartStateID)
 {
@@ -1172,7 +1191,7 @@ int RSTARPlanner::SetSearchStartState(int SearchStartStateID)
 
 }
 
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void RSTARPlanner::PrintSearchState(RSTARState* state, FILE* fOut)
 {
@@ -1182,7 +1201,7 @@ void RSTARPlanner::PrintSearchState(RSTARState* state, FILE* fOut)
 	environment_->PrintState(state->MDPstate->StateID, true, fOut);
 
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 int RSTARPlanner::getHeurValue(int StateID)
@@ -1191,7 +1210,7 @@ int RSTARPlanner::getHeurValue(int StateID)
 	RSTARState* searchstateinfo = (RSTARState*)MDPstate->PlannerSpecificData;
 	return searchstateinfo->h;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 vector<int> RSTARPlanner::GetSearchPath(int& solcost)
 {
@@ -1290,7 +1309,7 @@ vector<int> RSTARPlanner::GetSearchPath(int& solcost)
     solcost = pathcost;
 	return wholePathIds;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void RSTARPlanner::PrintSearchPath(FILE* fOut)
 {
 	vector<int> pathIds;
@@ -1305,7 +1324,7 @@ void RSTARPlanner::PrintSearchPath(FILE* fOut)
 	}
 
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs)
 {
 	CKey key;
@@ -1442,7 +1461,7 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 	return ret;
 
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //-----------------------------Interface function-----------------------------------------------------
 //returns 1 if found a solution, and 0 otherwise
@@ -1453,7 +1472,7 @@ int RSTARPlanner::replan(double allocated_time_secs, vector<int>* solution_state
 	return replan(allocated_time_secs, solution_stateIDs_V, &solcost);
 	
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //returns 1 if found a solution, and 0 otherwise
 int RSTARPlanner::replan(double allocated_time_secs, vector<int>* solution_stateIDs_V, int* psolcost)
 {
@@ -1479,7 +1498,7 @@ int RSTARPlanner::replan(double allocated_time_secs, vector<int>* solution_state
   return (int)bFound;
 
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int RSTARPlanner::set_goal(int goal_stateID)
 {
@@ -1506,7 +1525,7 @@ int RSTARPlanner::set_goal(int goal_stateID)
 
     return 1;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int RSTARPlanner::set_start(int start_stateID)
 {
@@ -1535,7 +1554,7 @@ int RSTARPlanner::set_start(int start_stateID)
     return 1;
 
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 void RSTARPlanner::costs_changed(StateChangeQuery const & stateChange)
@@ -1552,7 +1571,7 @@ void RSTARPlanner::costs_changed()
 
 }
 
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int RSTARPlanner::force_planning_from_scratch()
 {
@@ -1562,7 +1581,7 @@ int RSTARPlanner::force_planning_from_scratch()
 
     return 1;
 }
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int RSTARPlanner::set_search_mode(bool bSearchUntilFirstSolution)
 {
