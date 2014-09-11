@@ -591,7 +591,7 @@ void RSTARPlanner::DeleteSearchStateData(RSTARState* state){
 	return;
 }
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-void RSTARPlanner::DeleteSearchActionData(RSTARACTIONDATA* actiondata)
+void RSTARPlanner::DeleteSearchActionData(RSTARACTIONDATA* actiondata) // Esse método é chamado na linha 539 pelo método ReinitializeSearchStateInfo, na linha 578 no método DeleteSearchSteteData e por fim na linha 1021, pelo método DeleteSearchStateSpace
 {
 	//no memory was allocated for actiondata
 
@@ -599,7 +599,7 @@ void RSTARPlanner::DeleteSearchActionData(RSTARACTIONDATA* actiondata)
 }
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int RSTARPlanner::GetGVal(int StateID){ // Não encontrei quem chama esse método
+int RSTARPlanner::GetGVal(int StateID){ // Não encontrei quem chama esse método no RStar
 
 	 CMDPSTATE* cmdp_state = GetState(StateID); // é pego o estado com o id passado por paramentro e armazenado na variavel local 
 	 RSTARState* state = (RSTARState*)cmdp_state->PlannerSpecificData; //Em seguida é armazenado em outra variavel temporaria o resultado do PlannerSpecificData
@@ -651,7 +651,7 @@ CKey RSTARPlanner::ComputeKey(RSTARState* rstarState){ // [Método chamado na lin
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //returns 1 if the solution is found, 0 if the solution does not exist and 2 if it ran out of time
-int RSTARPlanner::ImprovePath(double MaxNumofSecs){
+int RSTARPlanner::ImprovePath(double MaxNumofSecs){ // Método chamado na linha 1327 pelo método Search
 
 	int expands;
 	RSTARState *rstarstate, *searchgoalstate, *searchstartstate;
@@ -978,7 +978,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs){
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //note this does NOT re-compute heuristics, only re-orders OPEN list based on current eps and h-vals
-void RSTARPlanner::Reevaluatefvals(){
+void RSTARPlanner::Reevaluatefvals(){ // Método chamado na linha 1327 pelo método Search
 	// Método responsável em reordenar a lista aberta considerando  os valores de E e H
 	CKey key;
 	int i;
@@ -1000,14 +1000,14 @@ void RSTARPlanner::Reevaluatefvals(){
 
 //creates (allocates memory) search state space
 //does not initialize search statespace
-int RSTARPlanner::CreateSearchStateSpace() {
+int RSTARPlanner::CreateSearchStateSpace() { // Método chamado pelo construtor na linha 41
 
 
 	//create a heap
 	pSearchStateSpace->OPEN = new CHeap; // Cria a lista aberta
 	MaxMemoryCounter += sizeof(CHeap); // Atualiza a mémoria
 	//pSearchStateSpace->inconslist = new CList;
-	//MaxMemoryCounter += sizeof(CList);
+	//MaxMemoryCounter += sizeof(CList);   // IGNORA NOVAMENTE AS LISTAS ICONS
 
 	pSearchStateSpace->searchgoalstate = NULL; // Defini GOAL como nulo momentaneamente
 	pSearchStateSpace->searchstartstate = NULL; // Defini START como nulo memomentaneamente
@@ -1018,7 +1018,7 @@ int RSTARPlanner::CreateSearchStateSpace() {
 }
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //deallocates memory used by SearchStateSpace
-void RSTARPlanner::DeleteSearchStateSpace() {
+void RSTARPlanner::DeleteSearchStateSpace() { // Método chamado pelo destrutor na linha 111
 
 	if(pSearchStateSpace->OPEN != NULL) // Se existir lista ABERTA
 	{
@@ -1029,7 +1029,7 @@ void RSTARPlanner::DeleteSearchStateSpace() {
 
 	//if(pSearchStateSpace->inconslist != NULL)
 	//{
-	//	pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID); // Ignore as listas Incons
+	//	pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID);  // Ignora, NÃO SEI o PORQUE, as listas Incons
 	//	delete pSearchStateSpace->inconslist;
 	//	pSearchStateSpace->inconslist = NULL;
 	//}
@@ -1046,69 +1046,68 @@ void RSTARPlanner::DeleteSearchStateSpace() {
 		}
 		if(state != NULL) // Se apenas existir o estado e não estiver setado o planner
 		{
-			for(int aind = 0; aind < (int)state->Actions.size(); aind++)
+			for(int aind = 0; aind < (int)state->Actions.size(); aind++) 
 			{
 				if(state->Actions[aind]->PlannerSpecificData != NULL) // Revisar essa outra parte (Action,Planner ... )
 				{
-					DeleteSearchActionData((RSTARACTIONDATA*)state->Actions[aind]->PlannerSpecificData);
-					delete (RSTARACTIONDATA*)state->Actions[aind]->PlannerSpecificData;
-					state->Actions[aind]->PlannerSpecificData = NULL;
+					DeleteSearchActionData((RSTARACTIONDATA*)state->Actions[aind]->PlannerSpecificData); // Não faz nada esse método
+					delete (RSTARACTIONDATA*)state->Actions[aind]->PlannerSpecificData; // Deleta as informações especifica do planejador
+					state->Actions[aind]->PlannerSpecificData = NULL; // Seta as mesmas como nulo
 				}
 			}//over actions
 		}
 	}
 
-	pSearchStateSpace->searchMDP.Delete();
+	pSearchStateSpace->searchMDP.Delete(); // Depois deleta o grafo GAMA
 }
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 //reset properly search state space
 //needs to be done before deleting states
-int RSTARPlanner::ResetSearchStateSpace()
-{
-	pSearchStateSpace->OPEN->makeemptyheap();
-	//pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID);
+int RSTARPlanner::ResetSearchStateSpace() { // [Ninguém chama esse método]
 
+	pSearchStateSpace->OPEN->makeemptyheap(); // Seta o indice de todos os estados da pilha para 0 [ heap.cpp 152 ]
+	//pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID); // IGNORA NOVAMENTE A LISTA INCONS
 	return 1;
 }
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //initialization before each search
-void RSTARPlanner::ReInitializeSearchStateSpace()
+void RSTARPlanner::ReInitializeSearchStateSpace() //[Método chamado na linha 1327 pelo método Search]
 {
 	//increase callnumber
-	pSearchStateSpace->callnumber++;
+	pSearchStateSpace->callnumber++; // Incrementa o número de chamadas do R*
 
 	//reset iteration
-	pSearchStateSpace->searchiteration = 0;
-	pSearchStateSpace->bNewSearchIteration = true;
+	pSearchStateSpace->searchiteration = 0; // Como de costume ele é resetado a cada incremento do CallNumber
+	pSearchStateSpace->bNewSearchIteration = true; // Seta a variavel bNewSearchIteration como true informando que é uma nova iteração de busca para que o número de iteracoes seja incrementado na linha 1391
 
 #if DEBUG
     SBPL_FPRINTF(fDeb, "reinitializing search state-space (new call number=%d search iter=%d)\n", 
             pSearchStateSpace->callnumber,pSearchStateSpace->searchiteration );
 #endif
 
-	pSearchStateSpace->OPEN->makeemptyheap();
-	//pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID);
+	pSearchStateSpace->OPEN->makeemptyheap(); // Seta o indice de todos os estados da pilha ABERTO para 0
+	//pSearchStateSpace->inconslist->makeemptylist(RSTAR_INCONS_LIST_ID); // NOVAMENTE IGNORA A LISTA INCOS
 
     //reset 
-	pSearchStateSpace->eps = this->finitial_eps;
-    pSearchStateSpace->eps_satisfied = INFINITECOST;
+	pSearchStateSpace->eps = this->finitial_eps; // Reseta o valor inicial de eps para 5,0
+    pSearchStateSpace->eps_satisfied = INFINITECOST; // e o de eps_satisfied para infinito
 
 	//initialize start state
-	RSTARState* startstateinfo = (RSTARState*)(pSearchStateSpace->searchstartstate->PlannerSpecificData);
-	if(startstateinfo->callnumberaccessed != pSearchStateSpace->callnumber)
-		ReInitializeSearchStateInfo(startstateinfo);
+	RSTARState* startstateinfo = (RSTARState*)(pSearchStateSpace->searchstartstate->PlannerSpecificData); // Inicializa o estado inicial passando as informações do planejador RStar
+	if(startstateinfo->callnumberaccessed != pSearchStateSpace->callnumber) //verifica se o numero de acessos é diferente do nuúmero de chamadas feitas, se sim reinicialize as informações de busca para atualizar essas informaç~eos
+		ReInitializeSearchStateInfo(startstateinfo); // Executa o método da linha 539 passando o estado atual, nele será resetado as configurações padroes do estado
 	
-	startstateinfo->g = 0;
+	startstateinfo->g = 0; // No método ReInitializeSearchStateInfo o G é setado para infito e aqui resetado para 0
 
 
 	//insert start state into the heap
-	pSearchStateSpace->OPEN->insertheap(startstateinfo, ComputeKey(startstateinfo));
+	pSearchStateSpace->OPEN->insertheap(startstateinfo, ComputeKey(startstateinfo)); // Insere o estado inicial na lista de aberto, passando o estado e sua chave
 
-    pSearchStateSpace->bReinitializeSearchStateSpace = false;
-	pSearchStateSpace->bReevaluatefvals = false;
+    pSearchStateSpace->bReinitializeSearchStateSpace = false; // Volta o valor da variavel bReinitializeSearchStateSpace para falso
+	pSearchStateSpace->bReevaluatefvals = false; // E informa que não há necessidade de reavaliar os valores de F - Linha 981
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
