@@ -1,0 +1,353 @@
+unit HeapRstar;
+
+{$mode objfpc}{$H+}
+{$MODESWITCH advancedrecords}
+interface
+
+uses
+  Classes, SysUtils;
+
+type
+    {key.h - 43 - OK}
+
+    { tCKey }
+
+    tCKey = record
+       key : array[0..1] of Integer;
+    public
+       //constructor create() -  Mudei para registro (Sobrecarga) e perdeu o construtor;
+       class operator < (const keyA,keyB:tCKey): Boolean;
+       class operator > (const keyA,keyB:tCKey): Boolean;
+       class operator = (const keyA,keyB:tCKey): Boolean;
+
+
+       procedure setKeytoInfinity();
+end;
+
+type
+      tListElement = record
+         prev :  ^tListElement;
+         next : ^tListElement;
+        // listState : ^tAbstractSearchState;
+      end;
+
+
+  type
+    //pListElement = ^tListElement;
+    {Planner.h -  114}
+    tAbstractSearchState = class
+       listElem: ^tListElement;    //listElem[2]: pListElement;
+       heapindex: integer;
+       StateType: integer; {ABSTRACT_STATE = 0, ABSTRACT_STATEACTIONPAIR =1, ABSTRACT_GENERALSTATE=2}
+end;
+
+type
+  pAbstractSearchState = ^tAbstractSearchState;
+  {heap.h - 36}
+
+  { tHeapElement }
+
+  tHeapElement = class abstract
+     heapstate: pAbstractSearchState;
+     key:tCKey;
+  public
+
+end;
+
+
+
+type
+  pHeapElement = ^tHeapelement;
+  tCHeap = Class
+     percolates:integer;
+     heap: pHeapElement;
+     currentsize:integer;
+     allocated:integer;
+
+  public
+     constructor create();
+
+     function emptyheap(): boolean;
+     function fullheap(): boolean;
+     function getminkeyheap(): tCKey;
+     function InfiniteKey():tCKey;
+     function deleteminheap(): pAbstractSearchState;
+
+     procedure percolatedown(hole:integer; tmp: tHeapelement);
+     procedure percolateUp(hole: integer; tmp: tHeapelement);
+     procedure percolateupordown(hole: integer; tmp: tHeapelement);
+     procedure makeemptyheap();
+     procedure makeheap();
+     procedure insertheap(abstractSearchState: pAbstractSearchState; key: tCKey);
+     procedure growheap();
+     procedure sizecheck();
+     procedure updateheap(AbstractSearchState: pAbstractSearchState;  NewKey:tCKey);
+
+end;
+
+
+const
+HEAPSIZE = 20000000;
+HEAPSIZE_INIT = 5000;
+LIMIT_LOOP_OK = 1;
+RESTART_LIMIT_LOOP =0;
+KEY_SIZE =2;
+INFINITECOST =  1000000000;
+
+implementation
+
+
+
+{tCHeap - Heap.cpp - 54}
+constructor tCHeap.create;
+begin
+     self.percolates := 0;
+     self.currentsize := 0;
+     self.allocated := HEAPSIZE_INIT;
+     self.heap^ :=  tHeapElement.create();      //   heapelement[allocated];
+end;
+
+{Sobrecarga < das chaves}
+class operator tCKey.<(const keyA, keyB: tCKey): Boolean;
+begin
+     if (keyA.key[0] < keyB.key[0]) and (keyA.key[1] < keyB.key[1]) then
+        result:=true;
+     result:=false;
+end;
+
+{Sobrecarga > das chaves}
+class operator tCKey.>(const keyA, keyB: tCKey): Boolean;
+begin
+     if (keyA.key[0] > keyB.key[0]) and (keyA.key[1] > keyB.key[1]) then
+        result:=true;
+     result:=false;
+end;
+
+class operator tCKey.=(const keyA, keyB: tCKey): Boolean;
+begin
+     if (keyA.key[0] = keyB.key[0]) and (keyA.key[1] = keyB.key[1]) then
+        result:=true;
+     result:=false;
+end;
+
+procedure tCHeap.percolatedown(hole: integer; tmp: tHeapelement);
+var
+   child: integer;
+   i:integer;
+   statusLoop: integer;
+begin
+     if (currentsize <> 0)  then
+     statusLoop:=LIMIT_LOOP_OK;
+     begin
+       for i:=0 to StatusLoop do hole:=child;
+       begin
+           statusLoop:=RESTART_LIMIT_LOOP;
+           if (2*hole <= currentsize) then
+                 statusLoop:= LIMIT_LOOP_OK;  {Inclui essa parte para controlar a parada que só aceita inteiro e n bool}
+                 //continue;   {Ajeitar depois}
+
+            child:=2 * hole;
+
+            if ( (child <> currentsize) AND( heap[child+1].key < heap[child].key) ) then
+	         child:= child+1;
+
+            if( heap[child].key < tmp.key) then
+            begin
+               percolates := percolates+1;
+	       heap[hole] := heap[child];
+	       heap[hole].heapState^.heapindex := hole; {Ajeitar depois}
+            end
+            else
+               // break; {Ajeitar depois}
+
+       end; // End For
+
+        heap[hole]:= tmp;
+         heap[hole].heapState^.heapindex := hole; {Ajeitar depois}
+
+     end; // End IF
+end;
+procedure tCHeap.percolateUp(hole: integer; tmp: tHeapelement);
+var
+   child: integer;
+   i:integer;
+   statusLoop: integer;
+begin
+   statusLoop:=LIMIT_LOOP_OK;
+   if (currentsize <> 0 ) then
+   begin
+        for i:=0 to StatusLoop do hole:=round(hole/2); // Pela limitação do Delphi, tenho que transformar em inteiro
+        begin
+
+          statusLoop:=RESTART_LIMIT_LOOP;
+
+          if ( (hole > 1) AND (tmp.key < heap[round(hole/2)].key) ) then
+            begin
+                 statusLoop:= LIMIT_LOOP_OK;  {Inclui essa parte para controlar a parada que só aceita inteiro e n bool}
+                 //continue;   {Ajeitar depois}
+            end;
+
+            percolates := percolates + 1;
+	    heap[hole] := heap[round(hole/2)];
+	    heap[hole].heapstate^.heapindex := hole;
+
+        end; // end for
+         heap[hole] := tmp;
+         heap[hole].heapstate^.heapindex := hole;
+   end;  //end if
+
+end;
+
+procedure tCHeap.percolateupordown(hole: integer; tmp: tHeapelement);
+begin
+     if ( currentsize <> 0) then
+      begin
+       if ( (hole > 1) AND (heap[round(hole/2)].key > tmp.key) ) then
+         percolateUp(hole, tmp)
+       else
+         percolatedown(hole, tmp);
+     end;
+end;
+
+function tCHeap.emptyheap(): boolean;
+begin
+   result:= (currentsize = 0);
+end;
+
+function tCHeap.fullheap(): boolean;
+begin
+   result:= (currentsize = HEAPSIZE-1);
+end;
+
+{bool CHeap::inheap(AbstractSearchState *AbstractSearchState)
+
+  return (AbstractSearchState->heapindex != 0);
+}
+
+{CKey CHeap::getkeyheap(AbstractSearchState *AbstractSearchState)
+
+  if (AbstractSearchState->heapindex == 0)
+    heaperror("GetKey: AbstractSearchState is not in heap");
+
+  return heap[AbstractSearchState->heapindex].key;
+}
+
+procedure tCHeap.makeemptyheap();
+var
+   i:integer;
+begin
+
+  for i:=1 to currentSize do;
+  begin
+       i:=i+1; // ++i (passo da iteracao)
+       heap[i].heapstate^.heapindex := 0;
+       currentsize := 0;
+  end;
+end;
+
+procedure tCHeap.makeheap();
+var
+   i:integer;
+begin
+
+  for i:= round(currentsize / 2) downto 0 do
+      percolatedown(i, heap[i]);
+
+end;
+
+procedure tCHeap.growheap();
+var
+ newHeap: pHeapElement;
+ i: integer;
+begin
+  allocated:=2*allocated;
+  if (allocated > HEAPSIZE) then
+     allocated:=HEAPSIZE;
+
+  newheap^ := tHeapElement.create(); //newheap = new heapelement[allocated]; Não sei para que serve esse alocated: ERROR
+
+  for i:=0 to currentsize do;
+  begin
+    newHeap[i] := heap[i];
+  end;
+  heap:= nil;
+  heap:= newHeap;
+end;
+
+ procedure tCHeap.sizecheck();
+ begin
+   if (fullheap()) then
+      // heap is full
+   else if(currentsize = allocated - 1) then
+      growheap();
+ end;
+
+procedure tCHeap.insertheap(abstractSearchState: pAbstractSearchState; key: tCKey);
+var
+ tmp: tHeapElement;
+ strTemp: char;    //strTemp[100]: char;
+begin
+  sizecheck();
+
+  if( abstractSearchState^.heapindex <> 0) then
+    // erro insertHeap: AbstractSearchState is already is heap
+  tmp.heapstate := abstractSearchState;
+  tmp.key:= key;
+  percolateUp(currentsize+1, tmp);
+end;
+
+
+function tCHeap.getminkeyheap(): tCKey;
+var
+   ReturnKey:tCKey;
+begin
+  if (currentsize = 0) then
+      result := InfiniteKey();
+  ReturnKey := heap[1].key;
+  result:= ReturnKey;
+end;
+
+//returns an infinite key
+function tCHeap.InfiniteKey():tCKey;
+var
+   key: tCKey;
+begin
+   key.setKeytoInfinity();
+   result:= key;
+end;
+
+procedure tCKey.setKeytoInfinity();
+var
+   i:integer;
+begin
+   for i := 0 to KEY_SIZE do
+      key[i] := INFINITECOST;
+end;
+
+function tCheap.deleteminheap(): pAbstractSearchState;
+var
+  AbstractSearchState: pAbstractSearchState;
+begin
+   if (currentsize = 0) then
+      //"DeleteMin: heap is empty");
+
+  AbstractSearchState := heap[1].heapstate;
+  AbstractSearchState^.heapindex := 0;
+  percolatedown(1, heap[currentsize-1]);
+  result:= AbstractSearchState;
+end;
+
+procedure tCHeap.updateheap(AbstractSearchState: pAbstractSearchState;  NewKey:tCKey);
+begin
+  if ( AbstractSearchState^.heapindex = 0) then
+        //"Updateheap: AbstractSearchState is not in heap";
+  if (heap[AbstractSearchState^.heapindex].key <> NewKey) then
+    {
+      heap[AbstractSearchState->heapindex].key = NewKey;
+      percolateupordown(AbstractSearchState->heapindex, heap[AbstractSearchState->heapindex]);
+    }
+end;
+
+
+end.
+
