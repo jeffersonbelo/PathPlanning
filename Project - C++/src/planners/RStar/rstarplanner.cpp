@@ -1543,7 +1543,7 @@ int RSTARPlanner::set_start(int start_stateID) // Chamado pelo main 553
 	}
 	else
 	{
-	    if(SetSearchGoalState(start_stateID) != 1) // Chama na 1146
+	    // Chama na 1146
         {
             SBPL_ERROR("ERROR: failed to set search goal state\n");
             return 0;

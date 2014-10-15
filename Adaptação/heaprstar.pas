@@ -24,11 +24,12 @@ type
        procedure setKeytoInfinity();
 end;
 
+{Erro besta - not resolved}
 type
       tListElement = record
          prev :  ^tListElement;
          next : ^tListElement;
-        // listState : ^tAbstractSearchState;
+         //listState : ^tAbstractSearchState;
       end;
 
 
@@ -97,7 +98,7 @@ INFINITECOST =  1000000000;
 implementation
 
 
-
+{Erro estranho - Não existe array no c´código original }
 {tCHeap - Heap.cpp - 54}
 constructor tCHeap.create;
 begin
@@ -143,8 +144,8 @@ begin
        begin
            statusLoop:=RESTART_LIMIT_LOOP;
            if (2*hole <= currentsize) then
-                 statusLoop:= LIMIT_LOOP_OK;  {Inclui essa parte para controlar a parada que só aceita inteiro e n bool}
-                 //continue;   {Ajeitar depois}
+                 statusLoop:= LIMIT_LOOP_OK;  {Inclui essa parte do código para controlar a condição de parada do for, pois a mesma  só aceita exrpessoes inteiro e n bool}
+                 //continue;   {erro estranho - Ajeitar depois}
 
             child:=2 * hole;
 
@@ -158,12 +159,12 @@ begin
 	       heap[hole].heapState^.heapindex := hole; {Ajeitar depois}
             end
             else
-               // break; {Ajeitar depois}
+               // break; {erro estranho - Ajeitar depois}
 
        end; // End For
 
         heap[hole]:= tmp;
-         heap[hole].heapState^.heapindex := hole; {Ajeitar depois}
+         heap[hole].heapState^.heapindex := hole;
 
      end; // End IF
 end;
@@ -184,7 +185,7 @@ begin
           if ( (hole > 1) AND (tmp.key < heap[round(hole/2)].key) ) then
             begin
                  statusLoop:= LIMIT_LOOP_OK;  {Inclui essa parte para controlar a parada que só aceita inteiro e n bool}
-                 //continue;   {Ajeitar depois}
+                 //continue;   {Erro estranho - Ajeitar depois}
             end;
 
             percolates := percolates + 1;
@@ -202,6 +203,7 @@ procedure tCHeap.percolateupordown(hole: integer; tmp: tHeapelement);
 begin
      if ( currentsize <> 0) then
       begin
+      {Duvida se esses limites do percolato são genericos e não presos ao limite do campo original}
        if ( (hole > 1) AND (heap[round(hole/2)].key > tmp.key) ) then
          percolateUp(hole, tmp)
        else
@@ -218,19 +220,6 @@ function tCHeap.fullheap(): boolean;
 begin
    result:= (currentsize = HEAPSIZE-1);
 end;
-
-{bool CHeap::inheap(AbstractSearchState *AbstractSearchState)
-
-  return (AbstractSearchState->heapindex != 0);
-}
-
-{CKey CHeap::getkeyheap(AbstractSearchState *AbstractSearchState)
-
-  if (AbstractSearchState->heapindex == 0)
-    heaperror("GetKey: AbstractSearchState is not in heap");
-
-  return heap[AbstractSearchState->heapindex].key;
-}
 
 procedure tCHeap.makeemptyheap();
 var
@@ -263,7 +252,7 @@ begin
   allocated:=2*allocated;
   if (allocated > HEAPSIZE) then
      allocated:=HEAPSIZE;
-
+                                      {Novamente o mesmo erro estranho, não existe array na estrutura }
   newheap^ := tHeapElement.create(); //newheap = new heapelement[allocated]; Não sei para que serve esse alocated: ERROR
 
   for i:=0 to currentsize do;
@@ -285,7 +274,7 @@ end;
 procedure tCHeap.insertheap(abstractSearchState: pAbstractSearchState; key: tCKey);
 var
  tmp: tHeapElement;
- strTemp: char;    //strTemp[100]: char;
+ strTemp: char;    //strTemp[100]: char;  {erro - quando crio o Char dessa forma, o compiler não reconhece}
 begin
   sizecheck();
 

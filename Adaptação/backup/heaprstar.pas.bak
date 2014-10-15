@@ -24,11 +24,12 @@ type
        procedure setKeytoInfinity();
 end;
 
+{Erro besta - not resolved}
 type
       tListElement = record
          prev :  ^tListElement;
          next : ^tListElement;
-        // listState : ^tAbstractSearchState;
+         //listState : ^tAbstractSearchState;
       end;
 
 
@@ -97,7 +98,7 @@ INFINITECOST =  1000000000;
 implementation
 
 
-
+{Erro estranho - Não existe array no c´código original }
 {tCHeap - Heap.cpp - 54}
 constructor tCHeap.create;
 begin
@@ -143,8 +144,8 @@ begin
        begin
            statusLoop:=RESTART_LIMIT_LOOP;
            if (2*hole <= currentsize) then
-                 statusLoop:= LIMIT_LOOP_OK;  {Inclui essa parte para controlar a parada que só aceita inteiro e n bool}
-                 //continue;   {Ajeitar depois}
+                 statusLoop:= LIMIT_LOOP_OK;  {Inclui essa parte do código para controlar a condição de parada do for, pois a mesma  só aceita exrpessoes inteiro e n bool}
+                 //continue;   {erro estranho - Ajeitar depois}
 
             child:=2 * hole;
 
@@ -158,7 +159,7 @@ begin
 	       heap[hole].heapState^.heapindex := hole; {Ajeitar depois}
             end
             else
-               // break; {Ajeitar depois}
+               // break; {erro estranho - Ajeitar depois}
 
        end; // End For
 
@@ -342,10 +343,10 @@ begin
   if ( AbstractSearchState^.heapindex = 0) then
         //"Updateheap: AbstractSearchState is not in heap";
   if (heap[AbstractSearchState^.heapindex].key <> NewKey) then
-    {
-      heap[AbstractSearchState->heapindex].key = NewKey;
-      percolateupordown(AbstractSearchState->heapindex, heap[AbstractSearchState->heapindex]);
-    }
+
+      heap[AbstractSearchState^.heapindex].key := NewKey;
+      percolateupordown(AbstractSearchState^.heapindex, heap[AbstractSearchState^.heapindex]);
+
 end;
 
 

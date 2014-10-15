@@ -136,32 +136,43 @@ type
 
        constructor create(environment: Pointer; bSearchForward:boolean);   {Modificar depois o ambiente, para assim atender as especificidades do ambiente do simulador}
 
-       {Declarações das funções}
-       function CreateSearchStateSpace(): integer;
-       function InitializeSearchStateSpace():integer;
-       function set_search_mode(_bSearchUntilFirstSolution:boolean):integer;
-       function set_start(start_stateID:integer):integer;
-       function set_goal(goal_stateID:integer):integer;
-       function SetSearchStartState(SearchStartStateID:integer):integer;
-       function SetSearchGoalState(SearchGoalStateID:integer):integer;
-       function GetState(StateID:integer): pCMDPState;
-       function CreateState(stateID:integer): pCMDPState;
        function ComputeHeuristic(MDPState: pCMDPState):integer;
+       function ComputeKey(rstarState:pRstarState):tCKey;
+       function CreateLSearchState(stateID:integer): pCMDPState;
+       function CreateSearchStateSpace(): integer;
+       function CreateState(stateID:integer): pCMDPState;
+       function DestroyLocalSearchMemory():boolean;
+       function GetLSearchState(stateID:integer):pCMDPState;
+       function GetState(StateID:integer): pCMDPState;
+       function GetSearchPath(solCost: pInteger): tIntegerArray;
+       function ImprovePath(MaxNumofSecs:double):integer;
+       procedure InitializeSearchStateInfo(state:pRStarState);
+       function InitializeSearchStateSpace():integer;
+       procedure Initialize_rstarlsearchdata(state: pCMDPState);
+       procedure Initialize_searchInfo(state: pCMDPState);
+       function LocalSearchComputeKey(rstarlsearchState: pRStarLSearchState):tCkey;
        function replan(allocated_time_secs:double; solution_stateIDs_v: array of pInteger):integer;
        function replan(allocated_time_secs:double; solution_stateIDs_v: array of pInteger; pSolCost:pInteger):integer;
-       function Search(pathIds: array of Integer; PathCost: Integer; bFirstSolution:boolean; bOptimalSolution:boolean; MaxNumofSecs:double):boolean;
-       function ComputeKey(rstarState:pRstarState):tCKey;
-       function ImprovePath(MaxNumofSecs:double):integer;
-       function DestroyLocalSearchMemory():boolean;
-       function GetSearchPath(solCost: pInteger): tIntegerArray;
-
-       {Declarações das procedures}
-       procedure Initialize_searchInfo(state: pCMDPState);
-       procedure InitializeSearchStateInfo(state:pRStarState);
-       procedure ReInitializeSearchStateSpace();
        procedure ReInitializeSearchStateInfo(state:pRStarState);
+       procedure ReInitializeSearchStateSpace();
        procedure Reevaluatefvals();
+       function Search(pathIds: tIntegerArray; PathCost: Integer; bFirstSolution:boolean; bOptimalSolution:boolean; MaxNumofSecs:double):boolean;
+       function set_search_mode(_bSearchUntilFirstSolution:boolean):integer;
+       function set_goal(goal_stateID:integer):integer;
+       function set_start(start_stateID:integer):integer;
        procedure SetBestPredecessor(rstarState:pRstarState; rstarPredState:pRstarState; action:pCMDPAction);
+       procedure set_initialsolution_eps(initialsolution_eps:double);
+       function SetSearchStartState(SearchStartStateID:integer):integer;
+       function SetSearchGoalState(SearchGoalStateID:integer):integer;
+
+
+
+
+
+
+
+
+
 
     private
     TimeStarted: TDateTime;
@@ -334,8 +345,7 @@ begin
 end;
 
 {RStarPlanner - 1138 - OK}
-function tRstarPlanner.SetSearchStartState(SearchStartStateID: integer
-  ): integer;
+function tRstarPlanner.SetSearchStartState(SearchStartStateID: integer): integer;
 var
 MDPstate: pCMDPState;
 begin
@@ -476,6 +486,25 @@ begin
      {Implementação da função "state^.predActionV.clear()"}
      {Fillchar (array,tamanho, elemento)}
      FillChar(state^.predActionV,Length(state^.predActionV),0);
+end;
+
+procedure tRstarPlanner.Initialize_rstarlsearchdata(state: pCMDPState);
+var
+     rstarlsearch_data: pRStarLSearchState;
+begin
+   rstarlsearch_data := pRStarLSearchState(state^.PlannerSpecificData); // Passa as informaçoes do planejador para a variavel RStarLSearch_data
+
+   rstarlsearch_data^.bestPredState := nil;
+   rstarlsearch_data^.bestPredStateActionCost := 0;
+   rstarlsearch_data^.iteration := 0;
+   rstarlsearch_data^.iterationClosed := 0;
+   rstarlsearch_data^.g := INFINITECOST;
+   rstarlsearch_data^.heapindex := 0;
+   rstarlsearch_data^.listElem[0] := Nil;
+   rstarlsearch_data^.listelem[1] := Nil;
+
+    //pointer to itself
+    rstarlsearch_data^.MDPState := state; //Seta o grafo MDP do estado com o estado passado por parametro
 end;
 
 {RStarPlanner - 441}
@@ -636,7 +665,8 @@ begin
        ret := false
      else
      begin  //SBPL_PRINTF("solution is found\n");
-      // pathIds := GetSearchPath(solcost);
+       //pathIds := GetSearchPath(@solcost);
+       {Coloco uma variavel para receber o resultado, faco um for e copio}
        ret := true;
      end;
      //SBPL_FPRINTF(fStat, "%d %d\n", highlevel_searchexpands, solcost);
@@ -991,7 +1021,7 @@ begin
                     if( (rstarSuccState^.bestPredAction = nil) OR
                     ( (rstarstate^.g + CLowV[i]) < rstarSuccState^.g) ) then
 
-                        SetBestPredecessor(rstarSuccState, rstarstate, action);
+                        SetBestPredecessor(rstarSuccState, rstarstate, action)
                         //SBPL_FPRINTF(fDeb, "bestpred was set for the succ (clow=%d)\n", CLowV[i]);
                     else
                         {SBPL_FPRINTF(fDeb, "bestpred was NOT modified - old one is better\n");}
@@ -1155,6 +1185,61 @@ begin
 
 end;
 
+function tRstarPlanner.LocalSearchComputeKey(
+  rstarlsearchState: pRStarLSearchState): tCkey;
+var
+   retKey:tCKey;
+   h:integer;
+begin
+  if(bforwardsearch) then
+    // h = environment_->GetFromToHeuristic(rstarlsearchState->MDPstate->StateID, pLSearchStateSpace->GoalState->StateID); // Envia o ID da posição atual e da posição objetivo e então é calculado o H chamando o método GetFromHeuristic. Linha 2836(environment_navXYTHETALAT.cpp)
+  else
+    // h = environment_->GetFromToHeuristic(pLSearchStateSpace->GoalState->StateID, rstarlsearchState->MDPstate->StateID); // Envia o ID da posição objetivo e da posição atual e então é calculado o H.
+   retKey.key[0] := rstarlsearchState^.g + round(pSearchStateSpace.eps * h);
+  result:= retKey;
+
+end;
+
+function tRstarPlanner.GetLSearchState(stateID: integer): pCMDPState;
+begin
+   if(stateID >=0 {apagar o 0 (int)environment_->StateID2IndexMapping.size()})then
+         {SBPL_ERROR("ERROR int GetLSearchState: stateID is invalid\n"); throw new SBPL_Exception();}
+
+	if({environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] == -1}true) then // Logo em seguida é verificado se há algum estado de busca criado (O valor -1 significa que nenhum estado busca foi criado ainda para este hashentry e nesse caso será criado um estado com esse ID)
+		result:= CreateLSearchState(stateID);
+	else
+		result:= pLSearchStateSpace.MDP.StateArray[0{apagar o 0  environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND]}]; // Em seguida é retornado o estado local
+
+end;
+
+function tRstarPlanner.CreateLSearchState(stateID: integer): pCMDPState;
+var
+    state: pCMDPState;
+begin
+   state := NULL;										 // Inicialmente cria um estado nulo.
+
+
+	if({environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] != -1apagar o true} true) then
+	      {SBPL_ERROR("ERROR in CreateState: state already created\n"); throw new SBPL_Exception();}
+
+
+	//adds to the tail a state
+	state := pLSearchStateSpace.MDP.addState(stateID); // Adciona o iD do estado ao grafo MDP e esse a variavel State
+
+	//remember the index of the state
+	//environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] = pLSearchStateSpace->MDP.StateArray.size()-1;
+
+
+	if(state <> pLSearchStateSpace.MDP.StateArray[{environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND apagar o 0} 0]) then
+	     {SBPL_ERROR("ERROR in CreateState: invalid state index\n");throw new SBPL_Exception();}
+
+	//create and initialize rstarlsearch_data
+	state^.PlannerSpecificData := tRStarLSearchState.create(); //Cria  um estado de busca local com os seguintes atributos: MDP; StartState; GoalState; iteration; OPEN; (incons list - used for suboptimal search) INCONS;
+	Initialize_rstarlsearchdata(state); // Inicializa o estado local, Linha 210
+
+	result:= state; //Após a inicialização das informações retorna o estado
+end;
+
 procedure tRstarPlanner.SetBestPredecessor(rstarState: pRstarState;
   rstarPredState: pRstarState; action: pCMDPAction);
 begin
@@ -1164,6 +1249,11 @@ begin
         pSearchStateSpace.OPEN^.insertheap(rstarState, ComputeKey(rstarState))
     else
         pSearchStateSpace.OPEN^.updateheap(rstarState, ComputeKey(rstarState));
+end;
+
+procedure tRstarPlanner.set_initialsolution_eps(initialsolution_eps: double);
+begin
+  finitial_eps := initialsolution_eps;
 end;
 
 end.
